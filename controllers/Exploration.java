@@ -1,4 +1,4 @@
-package MDP_Java_SRC.controllers;
+package cz3004MDP.controllers;
 
 import cz3004MDP.*;
 

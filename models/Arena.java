@@ -18,7 +18,7 @@ public class Arena {
 	public void printArena(){
 		for (int i = 0; i < X_GRID; i++){
 			for (int j = 0; j < Y_GRID; j++){
-				if(!state.isExplored())
+				if(!state.isVisited())
 					System.out.print("?");
 				else if(state.isClearGrid())
 					System.out.print("Y");

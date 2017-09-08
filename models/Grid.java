@@ -2,15 +2,15 @@ package cz3004MDP.models;
 
 public class Grid {
 
-	private boolean explored;
+	private boolean visited;
 	private boolean obstacle;
 	private boolean clearGrid;
-	private int x, y;
+	private int column, row;
 	private double gridValue;	
 	
 	// Default Constructor
 	public Grid(){
-		this.setExplored(false);
+		this.setVisited(false);
 		this.setObstacle(false);
 		this.setClearGrid(false);
 		
@@ -18,11 +18,11 @@ public class Grid {
 	}
 	
 	// Constructor
-	public Grid(int x, int y){
-		this.setX(x);
-		this.setY(y);
+	public Grid(int column, int row){
+		this.setColumn(column);
+		this.setRow(row);
 		
-		this.setExplored(false);
+		this.setVisited(false);
 		this.setObstacle(false);
 		this.setClearGrid(false);
 		
@@ -30,8 +30,8 @@ public class Grid {
 	}
 
 	
-	public boolean isExplored() {
-		return explored;
+	public boolean isVisited() {
+		return visited;
 	}
 
 	public boolean isObstacle() {
@@ -42,12 +42,12 @@ public class Grid {
 		return clearGrid;
 	}
 	
-	public int getX() {
-		return x;
+	public int getColumn() {
+		return column;
 	}
 	
-	public int getY() {
-		return y;
+	public int getRow() {
+		return row;
 	}
 	
 	public double getGridValue() {
@@ -57,15 +57,15 @@ public class Grid {
 	public void setObstacle(boolean obstacle) {
 		this.obstacle = obstacle;
 		if (obstacle == true){
-			setExplored(true);
+			setVisited(true);
 			setClearGrid(false);
 		}
 	}
 	
-	public void setExplored(boolean explored) {
-		this.explored = explored;
+	public void setVisited(boolean visited) {
+		this.visited = visited;
 		if (obstacle == true){
-			setExplored(true);
+			setVisited(true);
 			setClearGrid(false);
 		}
 	}
@@ -73,17 +73,17 @@ public class Grid {
 	public void setClearGrid(boolean clearGrid) {
 		this.clearGrid = clearGrid;
 		if (obstacle == true){
-			setExplored(true);
+			setVisited(true);
 			setObstacle(false);
 		}
 	}
 
-	public void setX(int x) {
-		this.x = x;
+	public void setColumn(int column) {
+		this.column = column;
 	}
 
-	public void setY(int y) {
-		this.y = y;
+	public void setRow(int row) {
+		this.row = row;
 	}
 
 	
@@ -93,7 +93,7 @@ public class Grid {
 	}
 
 	public void resetGrid(){
-		this.explored = false;
+		this.visited = false;
 		this.obstacle = false;
 		this.clearGrid = false;
 		this.gridValue = 0;

@@ -52,6 +52,11 @@ public class Robot implements ArenaRobot{
 		this.prevPos[0] = this.currentPos[0];
 		this.prevPos[1] = this.currentPos[1];
 		
+		
+		/*
+		 * If the 4 cells are (a,b), 1 (a,b+1), (a+1, b) and 23 (a+1,b+1) the center is 4
+		 * ( (a+1)x10, (b+1)x10 )
+		 */
 		switch(direction){
 		case EAST:
 			currentPos[1] += 1;
@@ -119,6 +124,8 @@ public class Robot implements ArenaRobot{
 		}
 	}
 	
+	
+	// this method is to convert the direction to string line
 	public String getStringDirection(){
 		switch(direction){
 		case EAST:

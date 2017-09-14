@@ -11,4 +11,13 @@ public interface ArenaRobot {
 	// ARENA SIZE
 	static final int ROW = 20;
 	static final int COLUMN = 15;
+	
+	// SENSOR RANGE
+	static final int SHORT_RANGE = 2;
+	static final int LONG_RANGE = 4;
+	
+	// START & END POSITION
+	static final int[] STARTPOSITION = new int[]{18,1};
+	static final int[] GOALPOSITION = new int[]{1,13};
+	
 }

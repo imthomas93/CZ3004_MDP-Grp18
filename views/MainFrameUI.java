@@ -33,8 +33,8 @@ public class MainFrameUI extends JFrame{
 	 */
 	public MainFrameUI() {
 		initialize();
-		arena = new Arena();
-		arena.printArena();
+		//arena = new Arena();
+		//arena.printArena();
 	}
 
 	/**

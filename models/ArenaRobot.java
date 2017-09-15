@@ -20,4 +20,9 @@ public interface ArenaRobot {
 	static final int[] STARTPOSITION = new int[]{18,1};
 	static final int[] GOALPOSITION = new int[]{1,13};
 	
+	// FILE NAME
+	static final String FILENAME1 = "PreDesign_Arena.txt";
+	static final String FILENAME2 = "Explored_Arena.txt";
+
+	
 }

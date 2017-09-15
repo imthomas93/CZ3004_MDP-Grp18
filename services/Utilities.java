@@ -1,20 +1,14 @@
 package cz3004MDP.services;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.io.PrintStream;
 
-import javax.management.timer.Timer;
 
 public class Utilities {
-	
-	public void startTimer(Timer timer){
-		System.out.println("timer start");
-		timer.start();
-	}
-	
-	public void stopTimer(Timer timer){
-		System.out.println("timer stop");
-		timer.stop();
-	}
 	
 	public void ImportMap(){
 		
@@ -101,5 +95,43 @@ public class Utilities {
 			return fullByteBitStream;
 		}
 		
-	}}
+	}
 
+	public void saveArenaToFile(String fn, ArrayList<String> arenaDetails){		
+		File file = new File(fn);
+		
+		try{
+			if (file.exists()){
+				file.delete();
+				file.createNewFile();
+			}
+			
+			PrintStream fileStream = new PrintStream(file);
+			for (int i = 0; i < arenaDetails.size();i++){
+				fileStream.println(arenaDetails.get(i));
+			}
+			fileStream.close();
+		}catch(IOException ioe){
+			ioe.printStackTrace();
+		}
+	}
+	
+	public ArrayList<String> getArenaFromFile(String fn){
+		ArrayList<String> result = new ArrayList<String>();
+		File file = new File(fn);
+		
+		try{
+			Scanner sc = new Scanner(file);
+			while(sc.hasNext()){
+				result.add(sc.next());
+			}
+			sc.close();
+		}
+		catch(IOException ioe){
+			ioe.printStackTrace();
+		}
+		
+		return result;
+
+	}
+}

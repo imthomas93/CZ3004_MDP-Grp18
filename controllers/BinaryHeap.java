@@ -4,10 +4,17 @@ import java.util.PriorityQueue;
 import java.util.Arrays;
 
 public class BinaryHeap <T extends Comparable<T>> extends PriorityQueue<T>{
-
+	private static final int DEFAULT_CAPACITY = 10;
 	protected T[] array;
 	protected int size;
 
+    //Constructor to create a new BinaryHeap
+    @SuppressWarnings("unchecked")
+	public BinaryHeap () {
+        array = (T[])new Comparable[DEFAULT_CAPACITY];  
+        size = 0;
+    }
+    
 	public boolean add(T value){
 		if (size >= array.length-1)
 			array = this.resize();

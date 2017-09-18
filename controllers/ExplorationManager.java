@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import cz3004MDP.models.Arena;
 import cz3004MDP.models.Grid;
 import cz3004MDP.models.Robot;
+import cz3004MDP.services.RpiCommProtocol;
 import cz3004MDP.services.Utilities;
 import cz3004MDP.models.ArenaRobot;
 
@@ -173,12 +174,110 @@ public class ExplorationManager implements ArenaRobot {
 		} while(result);
 	}
 
-	private int[][] pointAccessible(int[] is) {
+	private int[][] pointAccessible(int[] points) {
 		// TODO Auto-generated method stub
-		return null;
+		int counter  = 0;
+		int [][] tbExploredPts = new int[24][3];
+		int [][] accessiblePts = new int[24][3];
+		
+		for(int i = -1; i <2;i++){
+			// North Point
+			if(points[0] > 0){
+				if(!grid[points[0]-1][points[1]].isObstacle()){
+					tbExploredPts[1+i][0] = points[0]-2;
+					tbExploredPts[1+i][1] = points[1]+i;
+					tbExploredPts[1+i][2] = Robot.SOUTH;
+
+					tbExploredPts[4+i][0] = points[0]-3;
+					tbExploredPts[4+i][1] = points[1]+i;
+					tbExploredPts[4+i][2] = Robot.SOUTH;
+
+				}
+			}
+			// SOUTH POINT
+			if(points[0] < 19){
+				if(!grid[points[0]-1][points[1]].isObstacle()){
+					tbExploredPts[13+i][0] = points[0]+2;
+					tbExploredPts[13+i][1] = points[1]+i;
+					tbExploredPts[13+i][2] = Robot.NORTH;
+					
+					tbExploredPts[16+i][0] = points[0]+3;
+					tbExploredPts[16+i][1] = points[1]+i;
+					tbExploredPts[16+i][2] = Robot.NORTH;
+
+				}
+			}
+			
+			// EAST POINT
+			if(points[1] < 14){
+				if(!grid[points[0]+1][points[1]].isObstacle()){
+					tbExploredPts[7+i][0] = points[0]+i;
+					tbExploredPts[7+i][1] = points[1]+2;
+					tbExploredPts[7+i][2] = Robot.WEST;
+
+					tbExploredPts[10+i][0] = points[0]-3;
+					tbExploredPts[10+i][1] = points[1]+i;
+					tbExploredPts[10+i][2] = Robot.WEST;
+
+				}
+			}
+			
+			// WEST POINT
+			if(points[1]> 0){
+				if(!grid[points[0]][points[1]-1].isObstacle()){
+					tbExploredPts[19+i][0] = points[0]+i;
+					tbExploredPts[19+i][1] = points[1]-2;
+					tbExploredPts[19+i][2] = Robot.EAST;
+					
+					tbExploredPts[22+i][0] = points[0]+i;
+					tbExploredPts[22+i][1] = points[1]-3;
+					tbExploredPts[22+i][2] = Robot.EAST;
+
+				}
+			}
+		}
+		
+		for(int i = 0; i <tbExploredPts.length;i++){
+			boolean notAccessible = false;
+			
+			if(insideArena(tbExploredPts[i])){
+				for (int j=-1;j<2;j++){
+					for (int k=-1;k<2;k++){
+						if(!(grid[tbExploredPts[i][0]+j][tbExploredPts[i][1]+k].isVisited())
+								|| (grid[tbExploredPts[i][0]+j][tbExploredPts[i][1+k]].isObstacle())){
+							notAccessible = true;
+							break;
+						}
+						if(j == 1 && k ==1 && !notAccessible){
+							accessiblePts[counter][0] = tbExploredPts[i][0];
+							accessiblePts[counter][1] = tbExploredPts[i][1];
+							accessiblePts[counter][2] = tbExploredPts[i][2];
+							counter++;
+							i = i + (6 - i%6);
+						}
+					}
+					if(notAccessible)
+						break;
+				}
+			}
+				
+		}
+		return accessiblePts;
 	}
 
-	private void cleanupExploration(Grid[][] grid2, ArrayList<int[]> points) {
+	private boolean insideArena(int[]point) {
+		// TODO Auto-generated method stub
+		int row = point[0];
+		int col = point[1];
+		
+		if(row >0 && row < 19){
+			if(col > 0 && col < 19)
+				return true;
+		}
+		return false;
+	}
+
+	private String cleanupExploration(Grid[][] grid, ArrayList<int[]> points) {
 		// TODO Auto-generated method stub
 		int[] currentPos = robot.getCurrentPos();
 		int[][] pathCost;
@@ -187,8 +286,106 @@ public class ExplorationManager implements ArenaRobot {
 		
 		// implement here
 		
+		for(int i = 0; i < points.size();i++){
+			FastestPath fp = new FastestPath(grid, currentPos, points.get(i));
+			pathCost = fp.executeCost();
+			
+			if(pathCost[1][0] < cost){
+				path = pathCost[0];
+				cost = pathCost[1][0];
+			}
+		}
+		String robotPath = "";
+		
+		int[] tempPos = Grid.oneDPosToTwoD(path[0]);
+		int[] tempnextPos = Grid.oneDPosToTwoD(path[1]); 
+		
+		int curDeg = 0;
+		
+		if(tempnextPos[0] == tempPos[0])
+		{
+			if(tempnextPos[1] > tempPos[1])
+				curDeg = Robot.EAST;
+			else if(tempnextPos[1] < tempPos[1])
+				curDeg = Robot.WEST;
+		}
+		else if(tempnextPos[1] == tempPos[1])
+		{
+			if(tempnextPos[0] > tempPos[0])
+				curDeg = Robot.NORTH;
+			if(tempnextPos[0] > tempPos[0])
+				curDeg = Robot.SOUTH;
+		}
+		robotPath = robotPath + robot.turnReqDirection(robot.getDirection(), curDeg);
+
+		for(int j = 0; j <path.length-1; j++){
+			int [] curPos = Grid.oneDPosToTwoD(path[j]);
+			int [] nextPos = Grid.oneDPosToTwoD(path[j+1]);
+			
+			String curTurn = robot.turnString(curPos, nextPos, curDeg);
+			
+			if (curTurn.equals(RpiCommProtocol.RIGHTTURN))
+				curDeg = robot.getDirAftRightTurn(curDeg);
+			else if (curTurn.equals(RpiCommProtocol.LEFTTURN))
+				curDeg = robot.getDirAftLeftTurn(curDeg);
+			
+			robotPath = robotPath + curTurn;
+			robotPath = RpiCommProtocol.MOVESTRAIGHT;
+		}
+		
+		for(int j = 0; j < robotPath.length();  j++){
+			switch(robotPath.charAt(j)){
+			case 'R':
+				robot.rightTurn();
+				break;
+			case 'L':
+				robot.leftTurn();
+				break;
+			case 'M':
+				robot.goStraight();
+				break;
+			case 'B':
+				robot.goBack();
+				break;
+			}
+			
+			System.out.println(robot.getCurrentPos()[0] +", " + robot.getCurrentPos()[1]);
+
+			try {
+				Thread.sleep(1000/speed);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			arena.updateRobotPos();
+			
+			if(enableCoverageTerminal)
+			{
+				if(arena.calculateExplorationCoverage() >= coveragePercentage){
+					System.out.println(arena.calculateExplorationCoverage());
+					System.out.println(coveragePercentage);
+					System.out.println("need to go back");
+					isTimetoGoBack = true;
+				}
+			}
+		}
+		return robotPath;
 	}
 
+	public void cleanUpExploration(){
+		Thread thread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				cleanExplorationThread();
+			}
+		});
+	    thread.setPriority(Thread.NORM_PRIORITY);  
+	    thread.start();	
+		
+	}
+	
 	private void turnBackAndGoBack() {
 		// TODO Auto-generated method stub
 		robot.goBack();

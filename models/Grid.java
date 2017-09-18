@@ -3,13 +3,14 @@ package cz3004MDP.models;
 import java.util.ArrayList;
 
 
-public class Grid {
+public class Grid implements Comparable<Grid>, ArenaRobot{
 
 	private boolean obstacle;
 	private boolean visited;
 	private boolean clearGrid;
 	private int column, row;
-	private double gridValue;	
+	private int gridValue;	
+	public static final int GRID_MAXCOST  = 99999;
 	
 	// Default Constructor
 	public Grid(){
@@ -33,7 +34,7 @@ public class Grid {
 	}
 	
 	// Constructor 2
-	public Grid(int column, int row, double gridValue){
+	public Grid(int column, int row, int gridValue){
 		this.setColumn(column);
 		this.setRow(row);
 		this.setGridValue(gridValue);
@@ -66,7 +67,7 @@ public class Grid {
 		return row;
 	}
 	
-	public double getGridValue() {
+	public int getGridValue() {
 		return gridValue;
 	}
 
@@ -94,7 +95,7 @@ public class Grid {
 		this.row = row;
 	}
 
-	public void setGridValue(double gridValue) {
+	public void setGridValue(int gridValue) {
 		this.gridValue = gridValue;
 	}
 
@@ -143,6 +144,46 @@ public class Grid {
 		}
 		return false;
 	}
+
+	@Override
+	public int compareTo(Grid o) {
+		// TODO Auto-generated method stub
+		if(this.gridValue == o.gridValue)
+			return 0;
+		else if(this.gridValue > o.gridValue)
+			return 1;
+		else
+			return -1;
+	}
+	
+	public boolean equals(Grid o){
+		if(this.row == o.getRow() && this.column == o.getColumn())
+			return true;
+		else
+			return false;
+	}
+
+	public static ArrayList<int []> getUnexplorableWalkableNeighbour(int[] curPos, Grid[][] grid) {
+		// TODO Auto-generated method stub
+		ArrayList<int[]> neighbour = new ArrayList<int[]>();
+		if(Robot.isMovable(curPos[0],curPos[1], grid, Robot.NORTH))	//up
+			neighbour.add(new int[]{curPos[0]-1, curPos[1]});
+		if(Robot.isMovable(curPos[0],curPos[1], grid, Robot.SOUTH))	//bottom
+			neighbour.add(new int[]{curPos[0]+1, curPos[1]});
+		if(Robot.isMovable(curPos[0],curPos[1], grid, Robot.WEST))	//left
+			neighbour.add(new int[]{curPos[0], curPos[1]-1});
+		if(Robot.isMovable(curPos[0],curPos[1], grid, Robot.EAST))	//right
+			neighbour.add(new int[]{curPos[0], curPos[1]+1});
+		return neighbour;	
+	}
+
+	public static int[] oneDPosToTwoD(int current) {
+		// TODO Auto-generated method stub
+		int [] position = new int[2];
+		position[0] = current / COLUMN;
+		position[0] = current % COLUMN;
+		return position;
+	}
 	
 /* CHECK OUT THE LOGIC IF NEEDED
 //TODO: Edit Robot.canmovethrough() to the function written by xuhui
@@ -160,19 +201,7 @@ public class Grid {
 			return neighbour;
 		}
 		
-		
-		public static ArrayList<int[]> getUnexploreWalkableNeighbour(int[] curPos, GridCell[][] gridcell){
-			ArrayList<int[]> neighbour = new ArrayList<int[]>();
-			if(Robot.canMoveOrNotFP(curPos[0],curPos[1], gridcell, Robot.NORTH))	//up
-				neighbour.add(new int[]{curPos[0]-1, curPos[1]});
-			if(Robot.canMoveOrNotFP(curPos[0],curPos[1], gridcell, Robot.SOUTH))	//bottom
-				neighbour.add(new int[]{curPos[0]+1, curPos[1]});
-			if(Robot.canMoveOrNotFP(curPos[0],curPos[1], gridcell, Robot.WEST))	//left
-				neighbour.add(new int[]{curPos[0], curPos[1]-1});
-			if(Robot.canMoveOrNotFP(curPos[0],curPos[1], gridcell, Robot.EAST))	//right
-				neighbour.add(new int[]{curPos[0], curPos[1]+1});
-			return neighbour;
-		}
+
 
 	 */
 }

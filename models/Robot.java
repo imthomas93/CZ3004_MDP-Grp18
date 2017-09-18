@@ -158,7 +158,7 @@ public class Robot implements ArenaRobot{
 		}
 	}
 	
-	public boolean isInsideArena(int row, int column){
+	public static boolean isInsideArena(int row, int column){
 		// within row between 0 - 19
 		if (row >=0 && row <= ArenaRobot.ROW-1){
 			// within column between 0 - 19
@@ -170,7 +170,7 @@ public class Robot implements ArenaRobot{
 		return false;
 	}
 	
-	public boolean isMovable(int row, int column, Grid[][] grid, int direction){
+	public static boolean isMovable(int row, int column, Grid[][] grid, int direction){
 		switch(direction){
 		case NORTH:
 			row--;

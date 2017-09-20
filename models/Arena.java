@@ -25,6 +25,15 @@ public class Arena implements ArenaRobot{
 		return arenaSimulate;
 	}
 	
+	public void resetArena(){
+		for (int i = 0; i < ROW;  i++){
+			for(int j = 0; j < COLUMN; j++){
+				arenaSimulate[i][j].setClearGrid(false);
+				arenaSimulate[i][j].setVisited(false);
+			}
+		}
+	}
+	
 	public void updateRobotPos() {
 		// update explored arena before robot pos
 		updateArenaAftMove();

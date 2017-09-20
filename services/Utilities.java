@@ -5,17 +5,89 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import cz3004MDP.models.ArenaRobot;
+import cz3004MDP.models.Grid;
+
 import java.io.PrintStream;
 
 
-public class Utilities {
+public class Utilities implements ArenaRobot{
 	
-	public void ImportMap(){
+	public Grid[][] importMap(String fileName, Grid[][] grid){
+		ArrayList<String> arena = new ArrayList<String>();
+		arena = getArenaFromFile(FILENAME1);
+		String exploreBin = "";
+		String obstacleBin = "";
+		int expCounter = 0;
+		int obsCounter = 0;
 		
+		exploreBin = hexToBinary(arena.get(0));
+		obstacleBin = hexToBinary(arena.get(1));
+		
+		// remove the start and end "11" from explore string
+		exploreBin = exploreBin.substring(2, exploreBin.length()-2);
+		
+
+		for(int i = ROW-1; i>=0;i--){
+			for(int j = 0; j<COLUMN; j++){
+				if(exploreBin.charAt(expCounter) == '1'){
+					// visited
+					grid[i][j].setVisited(true);
+					if(obstacleBin.charAt(obsCounter) == '1'){
+						// contain obstacle = not a clear grid
+						grid[i][j].setObstacle(true);
+						grid[i][j].setClearGrid(false);
+					}
+					else{
+						// does not contain obstacle = a clear grid
+						grid[i][j].setObstacle(false);
+						grid[i][j].setClearGrid(true);
+					}
+				}
+				else{
+					grid[i][j].setVisited(false);
+					grid[i][j].setObstacle(false);
+					grid[i][j].setClearGrid(false);
+				}
+				expCounter++;
+				obsCounter++;
+			}
+		}
+		return grid;
 	}
 	
-	public void ExportMap(){
+	public ArrayList<String>  exportMap(Grid[][] grid){
+		String exploreBin = "";
+		String obstacleBin = "";
+		ArrayList<String> result = new ArrayList<String>();
+
+		for (int i = ROW-1; i >= 0; i--) {
+			for (int j = 0; j < COLUMN; j++) {	
+			
+				if(!grid[i][j].isVisited())
+					// grid is not yet visited
+					exploreBin = concat(exploreBin, "0");
+				else{
+					exploreBin = concat(exploreBin, "1");
+					if(!grid[i][j].isObstacle())
+						// grid do not contain an obstacle
+						obstacleBin = concat(obstacleBin, "0");
+					else
+						obstacleBin = concat(obstacleBin, "1");
+				}
+			}
+		}
+		// start and end string must contain "11"
+		exploreBin = "11" + exploreBin + "11";
+		String exploreHexResult = binaryToHex(exploreBin);
+		result.add(exploreHexResult);
+
+		obstacleBin = padBitstreamToFullByte(obstacleBin);
+		String obstacleHexResult = binaryToHex(obstacleBin);
+		result.add(obstacleHexResult);
 		
+		return result;
 	}
 	
 	public String binaryToHex(String binary){
@@ -79,7 +151,6 @@ public class Utilities {
 		return result;
 	}
 
-	// NEED MODIFY
 	private String padBitstreamToFullByte(String bitstream)
 	{
 		if (bitstream.length() % 8 == 0)

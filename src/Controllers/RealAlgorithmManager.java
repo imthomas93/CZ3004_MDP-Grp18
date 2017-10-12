@@ -1,6 +1,8 @@
 package Controllers;
 
+import java.time.temporal.IsoFields;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import Model.Arena;
 import Model.Grid;
@@ -15,16 +17,12 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	private Grid[][] grid;
 	private int[] wayPoint;
 	private Utilities utility = new Utilities();
-	private boolean timeToGoBack = false;
 	private boolean reachedGoal = false;
 	private boolean isAtWayPoint  = false;
-	private int speed;
-	private int coveredPercentage;
-	private boolean timesUp = false;
-	private boolean enableCoverageTerminal = false;
-	private boolean enableTimerTerminal = false;
 	private RpiManager rpiMgr = null;
-	private int moveCountCleanup = 0;
+	public static String sensorData;
+	private String fastestString = "";
+	private int moveCount = 0;
 	
 	public RealAlgorithmManager(Robot robot, Arena arena, int[] wayPoint, RpiManager rpiMgr){
 		this.robot = robot;
@@ -48,169 +46,149 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	{
 		boolean goStraight = false;
 		int moveCount = 0;
-		
 		Arena.appendMessage("Starting Real Exploration..");
-		// loop while robot is not yet at end goal
+		
+		// pre-run calibration
+		rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+		rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
+		rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+		rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT);
+		
+		// turn to north
+		robot.turnBack();
+		arena.updateRobotPosition();							
+		// loop while robot is not yet at GOAL ZONE
 		do{
-			// send starting arena and robot info to android for mapping
-			rpiMgr.sendInstruction(TABLET +"explore:\"" + arenaInforToStringVisited() + "\"");
-			rpiMgr.sendInstruction(TABLET + "grid:\"" + arenaInforToStringObstacle()+ "\"");		
-			rpiMgr.sendInstruction(TABLET + robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
-
-			
 			int row = robot.getCurrentPosition()[0];
 			int column = robot.getCurrentPosition()[1];
 		
-			if(goStraight){
-				// move forward
+			// MOVE STRAIGHT
+			if(goStraight){	
 				goStraight = false;
-
+				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" + generateMsgToTablet());
 				robot.goStraight();
-				rpiMgr.sendInstruction(AUDUINO + STRAIGHTMOVE1);
-				//rpiMgr.sendInstruction(TABLET + STRAIGHTMOVE1);
-
 				moveCount++;
-
-				
-			} else if(!this.leftIsBlocked()){
-				// TURN LEFT
-				// Calibrate before turning
+			
+			// TURN LEFT
+			}else if(!this.leftIsBlocked()){
+				// Calibrate FRONT & RIGHT before turning
 				if(robot.canFrontCalibrate(row, column, grid, robot.getRobotHead())){
-					rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
 					moveCount = 0;
 				}
 				if(robot.canRightCalibrate(row, column, grid, robot.getRobotHead())){
-					rpiMgr.sendInstruction(AUDUINO + TURNRIGHT);
-					rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
-					rpiMgr.sendInstruction(AUDUINO + TURNLEFT);
+					rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);			
+					rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
 					moveCount = 0;
 				}
-				
+				rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" + generateMsgToTablet());
 				robot.turnLeft();
-				rpiMgr.sendInstruction(AUDUINO + TURNLEFT);
 				goStraight = true;
 
 			} else if(!this.frontIsBlocked()){
-				// move forward
 				robot.goStraight();
 				goStraight = false;
-				rpiMgr.sendInstruction(AUDUINO + STRAIGHTMOVE1);
-				//rpiMgr.sendInstruction(TABLET + STRAIGHTMOVE1);
+				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" + generateMsgToTablet());
 				moveCount++;
-
-
 			}  else if(!this.rightIsBlocked()){
 				// turn right
-				// Calibrate before turning
+				// Calibrate FRONT & LEFT before turning
 				if(robot.canFrontCalibrate(row, column, grid, robot.getRobotHead())){
-					rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
 					moveCount = 0;
 				}
 				if(robot.canLeftCalibrate(row, column, grid, robot.getRobotHead())){
-					rpiMgr.sendInstruction(AUDUINO + TURNLEFT);
-					rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
-					rpiMgr.sendInstruction(AUDUINO + TURNRIGHT);
+					rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);	
+					rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
 					moveCount = 0;
 				}
+				rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" + generateMsgToTablet());
 				robot.turnRight();
-				rpiMgr.sendInstruction(AUDUINO + TURNRIGHT);
 				goStraight = true;
 			}
 			else {
-				// go back
-				// Calibrate before turning
-				if(robot.canFrontCalibrate(row, column, grid, robot.getRobotHead())){
-					rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
+				// Calibrate before turning				
+				boolean isCalibrated = calibrateRobot();
+				if (isCalibrated)
 					moveCount = 0;
-				}
-				if(robot.canLeftCalibrate(row, column, grid, robot.getRobotHead())){
-					rpiMgr.sendInstruction(AUDUINO + TURNLEFT);
-					rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
-					rpiMgr.sendInstruction(AUDUINO + TURNRIGHT);					
-					moveCount = 0;
-				}
-				else{
-					rpiMgr.sendInstruction(AUDUINO + TURNRIGHT);
-					rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
-					rpiMgr.sendInstruction(AUDUINO + TURNLEFT);
-					moveCount = 0;
-				}
-				robot.turnBack();
-				rpiMgr.sendInstruction(AUDUINO + TURNBACK);
+				
+				rpiMgr.sendInstruction2(AUDUINO + TURNBACK + "#" + generateMsgToTablet());
 				robot.turnBack();
 				goStraight = false;
 			}
 			
-			// do a calibration for every 7 moves
-			if(moveCount>3 && !this.frontIsBlocked()){
-				moveCount = 0;
-				calibrateRobot();
+			// do a calibration for every 5 moves
+			if(moveCount > 4){
+				boolean isCalibrated = calibrateRobot();
+				if (isCalibrated)
+					moveCount = 0;
 			}
 			// Output Moves position
-			Arena.appendMessage("Current Position: " + robot.getCurrentPosition()[0] + " ; " + robot.getCurrentPosition()[1] + "\tCounter: " + moveCount);
+			Arena.appendMessage("Current Pos(R/C/Deg): " + robot.getCurrentPosition()[0] + " ; " + robot.getCurrentPosition()[1]+ " ; " + robot.getRobotHead()+
+					"; Counter: " + moveCount+1);
 			
-			// Update on Android
-			rpiMgr.sendInstruction(TABLET +"explore:\"" + arenaInforToStringVisited() + "\"");
-			rpiMgr.sendInstruction(TABLET + "grid:\"" + arenaInforToStringObstacle()+ "\"");		
-			rpiMgr.sendInstruction(TABLET + robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
-
-			if(robot.getCurrentPosition()[0] == GOALPOSITION[0] 
-					&& robot.getCurrentPosition()[1] == GOALPOSITION[1])
+			if(robot.getCurrentPosition()[0] == 1 && robot.getCurrentPosition()[1] == 13){
 				reachedGoal=true;
-	
+			}
+			// update sensor readings and robot positon on arena UI
 			arena.updateRobotPosition();
-			//arena.updateCoverageAndTime();
-				
-		}while(!(robot.getCurrentPosition()[0] ==18 
-				&& robot.getCurrentPosition()[1] == 1) 
-				|| reachedGoal!=true);
 
-		// explore the rest using dijkstra algo
-		cleanupExplorationThread();
+		}while(reachedGoal == false);
 		
-		// do a final calibration at start position
+		// explore the rest using dijkstra algo from GOAL Position
+		// Return to start after 100% explored
+		dijkstraThread();
+	
+		// when back at start,calibrate  and turn to north
 		calibrateRobot();
-		
+	 	
+		switch(robot.getRobotHead()){
+		case NORTH:
+			break;
+		case SOUTH:
+			rpiMgr.sendInstruction2(AUDUINO + TURNLEFT);
+			rpiMgr.sendInstruction2(AUDUINO + TURNLEFT);
+			robot.setRobotHead(SOUTH);
+			break;
+		case EAST:
+			robot.setRobotHead(EAST);
+			rpiMgr.sendInstruction2(AUDUINO + TURNLEFT);
+			break;
+		case WEST:
+			robot.setRobotHead(WEST);
+			rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT);
+			break;
+	 	}			
 
-		if(reachedGoal){
-		 	switch(robot.getRobotHead()){
-			case NORTH:
-				break;
-			case SOUTH:
-				rpiMgr.sendInstruction(AUDUINO + TURNBACK);
-				break;
-			case EAST:
-				rpiMgr.sendInstruction(AUDUINO + TURNLEFT);
-				break;
-			case WEST:
-				rpiMgr.sendInstruction(AUDUINO + TURNRIGHT);
-				break;
-			}			
-			Arena.appendMessage("Exploration Completed!");
-			
-			// save file
-			ArrayList<String> result = new ArrayList<String>();
-			result = utility.exportMap(grid);
-			utility.saveArenaToFile(FILENAME2,result);
-			if(enableTimerTerminal)
-				arena.stopTimer();
-			
-			
-			rpiMgr.sendInstruction(TABLET +"explore:\"" + arenaInforToStringVisited() + "\"");
-			rpiMgr.sendInstruction(TABLET + "grid:\"" + arenaInforToStringObstacle()+ "\"");		
-			rpiMgr.sendInstruction(TABLET + robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
-		}
-		robot.turnToNorth();
+		// update the robot on UI for the final time
 		arena.updateRobotPosition();
-		fpgo(grid);
-	
+
+		utility.playExploreSuccessSound();
+		Arena.appendMessage("Exploration Completed!");
+		Arena.isExplorationDone = true;
+		
+		// Forward MDF string to tablet (REQUIREMENT)
+		generateMsgToTablet();
+		
+		// Save exploration file out
+		ArrayList<String> result = new ArrayList<String>();
+		result = utility.exportMap(grid);
+		utility.saveArenaToFile(FILENAME2,result);
+		
+		
+		// AWAIT FOR FASTESTPATH COMMAND
+		String input = rpiMgr.getInstructionFromAndroid();
+		if(input.equals("FP")){
+			Arena.appendMessage("Starting Fastest Path(via WayPoint)...");
+			realFPgo(grid);
+		}
 	}
-	
-	private void cleanupExplorationThread() {
-		// TODO Auto-generated method stub
+
+	private void dijkstraThread() {
 		boolean explorable = true;
-		do
-		{
+		do{
 			ArrayList<int[]> points = new ArrayList<int[]>();
 			for(int i=0; i< COLUMN; i++)
 			{
@@ -225,20 +203,19 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 					}
 				}
 			}
-			if(points.size() > 0)
-			{
-				//find fastest path to the cells+direction, return lowest cost path STRING
-				//travel to cell using path string
+			if(points.size() > 0){
+				// find the lowest cost path STRING to the next desired grid
 				cleanupExploration(grid, points);
 			}
 			else{
 				Arena.appendMessage("Fully explored or no path to unexplored areas");
 
-				if(robot.getCurrentPosition()[0] != 18  || robot.getCurrentPosition()[1] != 1)
-				{
-					points.add(STARTPOSITION);
+				if(robot.getCurrentPosition()[0] != 18  || robot.getCurrentPosition()[1] != 1){
+					// get the lowest cost path back to START
+					points.add(new int[]{18,1});
 					cleanupExploration(grid, points);
 				}
+				// terminate the loop
 				explorable = false;
 			}
 		}while(explorable);
@@ -247,13 +224,14 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	private String cleanupExploration(Grid[][] grid, ArrayList<int[]> points) {
 		// TODO Auto-generated method stub
 
-		int[] currentPos = robot.getCurrentPosition();
-		int[][] pathCost;
+		String robotPath = "";
 		int[] path = null;
+		int[] currentPos = robot.getCurrentPosition();
+		int[] tempPos, tempnextPos;
+		int[][] pathCost;
 		int cost=99999;
 		int curDeg = 0;
 
-		int moveCount = 0; 
 		for(int i=0; i<points.size(); i++)
 		{
 			FastestPath fp = new FastestPath(grid, currentPos, points.get(i));
@@ -265,9 +243,8 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 			}
 		}
 		
-		String robotPath = "";
-		int[] tempPos = Grid.convert1DPositionTo2DPositon(path[0]);
-		int[] tempnextPos = Grid.convert1DPositionTo2DPositon(path[1]);
+		tempPos = Grid.convert1DPositionTo2DPositon(path[0]);
+		tempnextPos = Grid.convert1DPositionTo2DPositon(path[1]);
 		
 		if(tempnextPos[0] == tempPos[0])
 		{
@@ -283,6 +260,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 			if(tempnextPos[0] > tempPos[0])
 				curDeg = Robot.SOUTH;
 		}
+		
 		robotPath += robot.turnToReqDirection(robot.getRobotHead(), curDeg);
 		
 		for(int j = 0; j<path.length-1;j++){
@@ -290,92 +268,120 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 			int[] nxtPos = Grid.convert1DPositionTo2DPositon(path[j+1]);
 	
 			String curTurn = robot.turnString(curPos, nxtPos, curDeg);
-			if(curTurn.equals(RobotArenaProtocol.TURNRIGHT))
+			if(curTurn.equals(TURNRIGHT))
 				curDeg = robot.getDirAfterRightTurn(curDeg);
-			else if(curTurn.equals(RobotArenaProtocol.TURNLEFT))
+			
+			else if(curTurn.equals(TURNLEFT))
 				curDeg = robot.getDirAfterLeftTurn(curDeg);
 			
 			robotPath += curTurn;
-			robotPath += RobotArenaProtocol.STRAIGHTMOVE1;
+			robotPath += FORWARD;
 		}
-		
+		Arena.appendMessage("Current path for robot to move: "+ robotPath);
+	
+		// forward the path to robot
 		for(int j = 0; j < robotPath.length(); j++){
-			int row = robot.getCurrentPosition()[0];
-			int column = robot.getCurrentPosition()[1];
 			
-			Arena.appendMessage("Current Movecount: " + moveCount);
+			// perform calibration every 3 steps
+			if(moveCount>2){
+				boolean isCalibrated = calibrateRobot();
+				if (isCalibrated)
+					moveCount = 0;
+			}	
 			
-			if(moveCount>7)
-				calibrateRobot();
-		
 			switch (robotPath.charAt(j)){
-			case 'D':
-				robot.turnRight();
-				rpiMgr.sendInstruction(AUDUINO+TURNRIGHT);
-				break;
-			case 'A':
-				robot.turnLeft();
-				rpiMgr.sendInstruction(AUDUINO+TURNLEFT);
-				break;
 			case 'W':
+				int counter = 1;
+				/*
+				for(int a = j+1; a <robotPath.length();a++){
+					if(robotPath.charAt(a) == 'W'){
+						robot.goStraight();
+						counter++;
+						j++;
+						moveCount++;
+						if(counter>=2)
+							break;
+					}
+					else
+						break;
+				}*/
+				String newFoward = FORWARD + counter;
+				rpiMgr.sendInstruction2(AUDUINO + newFoward  + "#"  + generateMsgToTablet());
 				robot.goStraight();
-				rpiMgr.sendInstruction(AUDUINO+STRAIGHTMOVE1);
-				break;
-			case 'B':
-				robot.turnBack();
-				rpiMgr.sendInstruction(AUDUINO+TURNBACK);
-				break;
-				default:
-		
-			}
-			Arena.appendMessage("Current Pos: " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1]);
 
-			rpiMgr.sendInstruction(TABLET +"explore:\"" + arenaInforToStringVisited() + "\"");
-			rpiMgr.sendInstruction(TABLET + "grid:\"" + arenaInforToStringObstacle()+ "\"");		
-			rpiMgr.sendInstruction(TABLET + robotLocationToString(row, column, robot.getRobotHead()));
-			
-			
+				moveCount++;
+				break;
+				
+			case 'A':
+				rpiMgr.sendInstruction2(AUDUINO+TURNLEFT  + "#"  + generateMsgToTablet());
+				robot.turnLeft();
+				moveCount++;
+				break;
+			case 'D':
+				rpiMgr.sendInstruction2(AUDUINO+TURNRIGHT + "#"  + generateMsgToTablet());
+				robot.turnRight();
+				moveCount++;
+				break;			
+			case 'B':
+				rpiMgr.sendInstruction2(AUDUINO + TURNBACK + "#" + generateMsgToTablet());
+				robot.turnBack();
+				moveCount++;
+				break;
+			}
+			Arena.appendMessage("Current Pos(R/C/Deg/Counter): " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1] + "; " + robot.getRobotHead() + " ; "  + moveCount);
 			arena.updateRobotPosition();
-			//arena.updateCoverageAndTime();
 		}
 		return robotPath;
 	}
 
-	public void fpgo(final Grid[][] grid){
+	public void realFPgo(final Grid[][] grid){
 		 Thread thread = new Thread(new Runnable() {  
 		        public void run() {  
+		        	fastestString = "";
 		        	// get shortest path to waypoint
 		        	Arena.appendMessage("Executing Fastest Path to waypoint!");
 		        	isAtWayPoint = false;
-		        	getFastestPath(grid);
-		        	 
+		        	fastestString = getFastestPathStringForRobot(grid);
 		        	Arena.appendMessage("Reached waypoint!");
+		        	
+		        	// get shortest path to GOAL
 		        	Arena.appendMessage("Executing Fastest Path to GOAL!");
 		        	isAtWayPoint = true;
-		        	// get shortest path to GOAL
-		        	getFastestPath(grid);
+		        	fastestString += getFastestPathStringForRobot(grid);
+		        	Arena.appendMessage("Fastest Path road: " + fastestString);
+
+		        	// Execute Fastest String WITH NO ACKNOWLEDGEMENT
+		        	rpiMgr.sendInstruction(AUDUINO + fastestString);
 		        }
 		    }  );
 		    thread.setPriority(Thread.NORM_PRIORITY);  
 		    thread.start();
 	}
 	
-	public String getFastestPath(Grid[][] grid)
+	public String getFastestPathStringForRobot(Grid[][] grid)
 	{
 		FastestPath fp;
+		String robotPath = "";
+		String result = "";
+		int curDeg;
+		// run from start to waypoint
 		if(!isAtWayPoint)
 			fp = new FastestPath(grid, STARTPOSITION, wayPoint);
+		// run from waypoint to goal
 		else
 			fp = new FastestPath(grid, wayPoint, GOALPOSITION);
 		 
+		// generate the list of direction to move
 		int[] path = fp.execute();
 		
-		Arena.appendMessage("Getting fastest path road");
-		String robotPath = "";
-		int curDeg = (Grid.convert1DPositionTo2DPositon(path[0]))[1] < (Grid.convert1DPositionTo2DPositon(path[1]))[1] ? Robot.EAST : Robot.NORTH;
+		// get the turn direction
+		curDeg = (Grid.convert1DPositionTo2DPositon(path[0]))[1] < (Grid.convert1DPositionTo2DPositon(path[1]))[1] ? Robot.EAST : Robot.NORTH;
+		// make the robot path to move
 		robotPath += robot.turnToReqDirection(robot.getRobotHead(), curDeg);
 
+		// run the robot path to the end
 		for(int j = 0; j<path.length-1;j++){
+			// convert the grid result
 			int[] curPos = Grid.convert1DPositionTo2DPositon(path[j]);
 			int[] nxtPos = Grid.convert1DPositionTo2DPositon(path[j+1]);
 			
@@ -387,29 +393,25 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				curDeg = robot.getDirAfterLeftTurn(curDeg);
 			}
 			robotPath += curTurn;
-			robotPath += STRAIGHTMOVE1;
+			robotPath += FORWARD;
 		}
 		
-		String newPath = "";
+		// re-format the robot path to move to simplifer form for faster running at arduino side
 		for(int j = 0; j < robotPath.length(); j++){
 			switch (robotPath.charAt(j)){
 			case 'D':
+				result += TURNRIGHT;
 				robot.turnRight();
-				newPath += TURNRIGHT;
-				rpiMgr.sendInstruction(TABLET+robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
 				break;
 			case 'A':
+				result += TURNLEFT;
 				robot.turnLeft();
-				newPath += TURNLEFT;
-				rpiMgr.sendInstruction(TABLET+robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
 				break;
 			case 'W':
 				int counter = 1;
 				for(int a = j+1; a <robotPath.length();a++){
 					if(robotPath.charAt(a) == 'W'){
 						robot.goStraight();
-						arena.updateRobotPosition();
-						rpiMgr.sendInstruction(TABLET+robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
 						counter++;
 						j++;
 						if(counter>=7)
@@ -418,25 +420,20 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 					else
 						break;
 				}
+				result += FORWARD + counter;
 				robot.goStraight();
-				rpiMgr.sendInstruction(TABLET+robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
-				newPath += STRAIGHTMOVE1 + counter;
 			case 'B':
+				result += TURNBACK;
 				robot.turnBack();
-				rpiMgr.sendInstruction(TABLET+robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
 				break;
 				default:
-			}
-			
-			Arena.appendMessage(robot.getCurrentPosition()[0] +", " + robot.getCurrentPosition()[1]);
-			
+			}			
 		}
-		rpiMgr.sendInstruction(AUDUINO+newPath);
-		rpiMgr.sendInstruction(TABLET+robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()));
-		return robotPath;
+		return result;
 	}
 	
-	//receive a single point, and return accessible points from NSEW, return value: int[index][point 0=row, 1=col][direction]
+	//receive a single point, and return accessible grids from WABD (direction), 
+	// returning: int[index][point 0=row, 1=col][direction]
 	public int[][] getAccessibleGrids(int[] points){
 		int count =0;
 		int[][] toBeExploredPoints = new int[24][3];
@@ -535,23 +532,30 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	}
 
 	/*
-	 * CALIBRATION AND SENSOR CHECKER
+	 * CALIBRATION
 	 */
-	private void calibrateRobot() {
-		// TODO Auto-generated method stub
+	private boolean calibrateRobot() {
 		int row = robot.getCurrentPosition()[0];
 		int column = robot.getCurrentPosition()[1];
 		
-		if(robot.canLeftCalibrate(row, column, grid, robot.getRobotHead())){
-			rpiMgr.sendInstruction(AUDUINO + TURNLEFT);
-			rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
-			rpiMgr.sendInstruction(AUDUINO + TURNRIGHT);
+		if(robot.canFrontCalibrate(row, column, grid, robot.getRobotHead()))
+		{	
+			rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+			return true;
+		}
+		else if(robot.canLeftCalibrate(row, column, grid, robot.getRobotHead())){
+			rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
+			rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+			rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
+			return true;
 		}
 		else if (robot.canRightCalibrate(row, column, grid, robot.getRobotHead())){
-			rpiMgr.sendInstruction(AUDUINO + TURNRIGHT);
-			rpiMgr.sendInstruction(AUDUINO + CALIBRATE);
-			rpiMgr.sendInstruction(AUDUINO + TURNLEFT);
+			rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);	
+			rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);	
+			rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
+			return true;
 		}
+		return false;
 	}
 
 	public boolean frontIsBlocked(){
@@ -661,15 +665,18 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	
 	
 	/*
-	 * STRING CONVERTER
-	 * 
-	 */
-	private String getFinalString() {
-		// TODO Auto-generated method stub
-		ArrayList<String> output = new ArrayList<String>();
-		output = utility.exportMap(grid);
-		String result = "{\"Map String\" : [" + output.get(1) + "]}";
-		return result;
+	 * STRING CONVERTER 
+	 */	
+	private String generateMsgToTablet() {
+		// concat 3 token with '!'
+		// 1) vistited/non visited area
+		// 2) obstacle area
+		// 3) robot location
+		String output = "";
+		output = TABLET +"explore:\"" + arenaInforToStringVisited() + "\"!";
+		output += "grid:\"" + arenaInforToStringObstacle()+ "\"!";
+		output += robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead());
+		return output;
 	}
 	
 	private String robotLocationToString(int row, int column, int robotHead) {

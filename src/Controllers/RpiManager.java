@@ -1,5 +1,6 @@
 package Controllers;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import Model.Arena;
@@ -28,11 +29,67 @@ public class RpiManager implements RobotArenaProtocol {
 
 	
 	public void sendInstruction(String instruction) {
-		// TODO Auto-generated method stub
+		// THIS METHOD SEND INSTRUCTION WITHOUT THE NEED TO WAIT FOR ACKNOWLEDGEMENT
 		try{
 			instruction = instruction.trim();
 			SocketClientManager.writeToSocket(instruction);
-			TimeUnit.MILLISECONDS.sleep(100);
+			TimeUnit.NANOSECONDS.sleep(100);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendInstruction2(String instruction) {
+		// THIS METHOD SEND INSTRUCTION WITH THE NEED TO WAIT FOR ACKNOWLEDGEMENT
+		try{
+			instruction = instruction.trim();
+			
+			SocketClientManager.writeToSocket(instruction);
+			while(true){
+				synchronized(socketThread){
+					Arena.appendMessage("Awaiting Movement ACK");
+					socketThread.wait();
+					String input = SocketClientManager.receivedMsg;
+				
+					// tokenise message
+					String[] inputData = input.split("!");
+					if (inputData[0].equals("ACK")){
+						RealAlgorithmManager.sensorData = inputData[1];
+						Arena.appendMessage("ACK!");
+						break;
+					}
+				}
+			}
+		
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendInstruction3(String instruction) {
+		// THIS METHOD SEND INSTRUCTION WITH THE NEED TO WAIT FOR ACKNOWLEDGEMENT
+		try{
+			instruction = instruction.trim();
+			
+			SocketClientManager.writeToSocket(instruction);
+			while(true){
+				synchronized(socketThread){
+					socketThread.wait();
+					Arena.appendMessage("Awaiting calibration ACK");
+
+					String input = SocketClientManager.receivedMsg;
+				
+					// tokenise message
+					String[] inputData = input.split("!");
+					if (inputData[0].equals("ACK")){
+						Arena.appendMessage("ACK!");
+						break;
+					}
+				}
+			}
+		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -43,11 +100,11 @@ public class RpiManager implements RobotArenaProtocol {
 		int[] result = new int[3]; 
 		String andoridInput = "";
 		
-		try {
-			// Testing
+		try {			
+			// ActuaL
 			SocketClientManager.writeToSocket(TABLET + "S");
 			
-			// Actual
+			// Testing
 			//SocketClientManager.writeToSocket(RPI + "s");
 
 			synchronized(socketThread){
@@ -58,7 +115,6 @@ public class RpiManager implements RobotArenaProtocol {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		String[] startPosition = andoridInput.split(";");
 		result[0] = Integer.parseInt(startPosition[0]);
 		result[1] = Integer.parseInt(startPosition[1]);
@@ -73,10 +129,10 @@ public class RpiManager implements RobotArenaProtocol {
 
 		try {
 			// Testing
-			SocketClientManager.writeToSocket(TABLET + "W");
-			
-			// Actual
 			//SocketClientManager.writeToSocket(RPI + "w");
+
+			// Actual
+			SocketClientManager.writeToSocket(TABLET + "W");
 
 			synchronized(socketThread){
 				socketThread.wait();
@@ -95,7 +151,7 @@ public class RpiManager implements RobotArenaProtocol {
 	}
 
 	public String getInstructionFromAndroid() {
-		// TODO Auto-generated method stub
+		// prepare to get EX or FP fron android
 		String andoridInput = "";
 		try {
 			synchronized(socketThread){
@@ -104,7 +160,6 @@ public class RpiManager implements RobotArenaProtocol {
 				System.out.println(andoridInput );
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -112,11 +167,9 @@ public class RpiManager implements RobotArenaProtocol {
 	}
 
 
-	public int[] getSensorReading() {
-		// TODO Auto-generated method stub
-		String sensorReading = "";
-		int [] result = new int[5];
-		
+	public String getSensorReading() {
+		// Return intial sensor reading then robot is ready
+		String sensorReading = "";		
 		try {
 			// Actual
 			SocketClientManager.writeToSocket(AUDUINO + SCANARENA);
@@ -129,17 +182,20 @@ public class RpiManager implements RobotArenaProtocol {
 				sensorReading = SocketClientManager.receivedMsg;
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		sensorReading = sensorReading.trim();
-		String[] sensorData = sensorReading.split(":");
-		
-		System.out.println(sensorReading);
-		for(int i = 0; i < 5;i++){
-			result[i] = Integer.parseInt(sensorData[i]);
+		return sensorReading;
+	}
+
+
+	public void disconnect() {
+		try {
+			SocketClientManager.openedSocket.close();
+			Arena.appendMessage("Socket Closed!");
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return result;
 	}
 
 }

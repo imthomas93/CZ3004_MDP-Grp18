@@ -92,7 +92,7 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				}
 				
 				arena.updateCoverageAndTime();
-				
+		
 			   if(enableTimerTerminal){
 				   if(timesUp == true){
 					   reachedGoal = true;
@@ -111,18 +111,20 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 						arena.stopTimer();
 					}
 				}
-				
-				
-				
+			
 				Arena.appendMessage("Current Pos: " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1]);
-					
+			/*	
 			}while((!(robot.getCurrentPosition()[0] == 18 && robot.getCurrentPosition()[1] == 1)
 					|| reachedGoal!=true) && timeToGoBack==false && timesUp == false);
+			*/
+			}while(reachedGoal == false);
+
+			Arena.appendMessage("out of loop");
 			
 			arena.updateRobotPosition();
+			
 			if(timeToGoBack || timesUp)
 				turnBackAndGoBack();
-			
 			
 			if(reachedGoal){
 				
@@ -308,12 +310,14 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 	public String getFastestPath(Grid[][] grid)
 	{
 		FastestPath fp;
+		Arena.appendMessage("Getting fastest path road");
 		if(!isAtWayPoint)
 			fp = new FastestPath(grid, STARTPOSITION, wayPoint);
 		else
 			fp = new FastestPath(grid, wayPoint, GOALPOSITION);
 		
 		int[] path = fp.execute();
+		
 		String robotPath = "";
 		int curDeg = (Grid.convert1DPositionTo2DPositon(path[0]))[1] < (Grid.convert1DPositionTo2DPositon(path[1]))[1] ? Robot.EAST : Robot.NORTH;
 		robotPath += robot.turnToReqDirection(robot.getRobotHead(), curDeg);
@@ -329,7 +333,7 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				curDeg = robot.getDirAfterLeftTurn(curDeg);
 			}
 			robotPath += curTurn;
-			robotPath += RobotArenaProtocol.STRAIGHTMOVE;
+			robotPath += RobotArenaProtocol.FORWARD;
 
 		}	
 		
@@ -359,7 +363,7 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 						break;
 				}
 				robot.goStraight();
-				newPath += STRAIGHTMOVE + counter;
+				newPath += FORWARD + counter;
 				break;
 			case 'B':
 				robot.turnBack();
@@ -376,24 +380,26 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 			}
 			arena.updateRobotPosition();
 		}
-		Arena.appendMessage(newPath);
 		return newPath;
 	}
 
 	public void fpgo(final Grid[][] grid){
 		 Thread thread = new Thread(new Runnable() {  
 		        public void run() {
-			        	
+			        String fastestString = "";
 		        	// get shortest path to waypoint
 		        	Arena.appendMessage("Executing Fastest Path to waypoint!");
 		        	isAtWayPoint = false;
-		        	getFastestPath(grid);
-		        	 
+		        	fastestString = getFastestPath(grid);
 		        	Arena.appendMessage("Reached waypoint!");
+		        	
+		        	// get shortest path to GOAL
 		        	Arena.appendMessage("Executing Fastest Path to GOAL!");
 		        	isAtWayPoint = true;
-		        	// get shortest path to GOAL
-		        	getFastestPath(grid);
+		        	fastestString += getFastestPath(grid);
+		        	
+		        	Arena.appendMessage("Fastest Path: " + fastestString);
+
 		        }
 		    }  );
 		    thread.setPriority(Thread.NORM_PRIORITY);  
@@ -406,9 +412,9 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 		do
 		{
 			ArrayList<int[]> points = new ArrayList<int[]>();
-			for(int i=0; i<RobotArenaProtocol.COLUMN; i++)
+			for(int i=0; i<COLUMN; i++)
 			{
-				for(int j=0; j<RobotArenaProtocol.ROW; j++)
+				for(int j=0; j<ROW; j++)
 				{
 					if(grid[j][i].getGridStatus()[0] == NOT_VISITED)
 					{
@@ -423,7 +429,6 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 			{
 				//find fastest path to the cells+direction, return lowest cost path STRING
 				cleanupExploration(grid, points);
-				//travel to cell using path string
 			}
 			else{
 				Arena.appendMessage("Fully explored or no path to unexplored areas");
@@ -490,22 +495,23 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				curDeg = robot.getDirAfterLeftTurn(curDeg);
 			}
 			robotPath += curTurn;
-			robotPath += RobotArenaProtocol.STRAIGHTMOVE;
+			robotPath += RobotArenaProtocol.FORWARD;
 
 			
 		}
+		Arena.appendMessage("Cur path: "+ robotPath);
 		for(int j = 0; j < robotPath.length(); j++){
 			switch (robotPath.charAt(j)){
-			case 'D':
-				robot.turnRight();
+			case 'W':
+				robot.goStraight();
 				break;
 			case 'A':
 				robot.turnLeft();
 				break;
-			case 'W':
-				robot.goStraight();
+			case 'D':
+				robot.turnRight();
 				break;
-			case 'S':
+			case 'B':
 				robot.turnBack();
 				break;
 				default:

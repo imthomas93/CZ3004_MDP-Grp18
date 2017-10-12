@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -44,7 +45,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	private RpiManager rpiMgr;
 	private int[] wayPoint = new int[2];
 
-	private boolean isSimulationDone = false;
+	public static boolean isExplorationDone = false;
 	private boolean isRealRunNow = false;
 	private String[] speedMeter = {"1", "5", "10"};
 	private Timer timer;
@@ -53,6 +54,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
     long duration, now, clockTime ;
 	DateFormat format = new SimpleDateFormat("mm:ss");
 	JFormattedTextField jtfTimeLimit = new JFormattedTextField(format);
+	Thread thread;
 
 	
 	// ARENA Var
@@ -122,7 +124,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	   	jlArenaDesign = new JLabel("Design arena area:");
 
 	   	jlSpeed = new JLabel("Speed (# of step/sec):");
-	   	jlWayPoint = new JLabel("WayPoint Coord(r/c): " + wayPoint[0] + "," + wayPoint[1]);
+	   	jlWayPoint = new JLabel("WP Cord: " + wayPoint[0] + "," + wayPoint[1]);
 	   	jlbCoveragePercent = new JLabel("Explored Coverage 0%");
 	   	jlbExpCoverage = new JLabel("Coverage (%):");
 	   	
@@ -321,7 +323,8 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	
 	// for real run reset
 	private void resetRobotPosition(int[] startPosition) {
-		robot.setRobotHead(NORTH);
+		if (!isRealRunNow)
+			robot.setRobotHead(NORTH);
 		
 		// set the color of the robot
 		for(int i=-1; i < 2; i++){
@@ -432,9 +435,16 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		}
 		// init sensor data for next step
 		if(isRealRunNow){
-			// Real Run
-			int [] sensorData = rpiMgr.getSensorReading();
-			robot.getSensorsData(arenaReal, sensorData);
+			int [] sensorResult = new int[6];
+			String sensorReading = RealAlgorithmManager.sensorData;
+			sensorReading = sensorReading.trim();
+			String[] sensorData = sensorReading.split(":");
+			
+			Arena.appendMessage("Sensor Readings: " + sensorReading);
+			for(int i = 0; i < 6;i++){
+				sensorResult[i] = Integer.parseInt(sensorData[i]);
+			}
+			robot.getSensorsData(arenaReal, sensorResult);
 		}
 		else
 			robot.getSensorsData(arenaReal);
@@ -524,6 +534,48 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		return ((count/arenaSize)*100);
 	}
 	
+	private void setupRealRun() {
+		appendMessage("Getting info from RPI");
+		rpiMgr = new RpiManager();
+		// TODO Auto-generated method stub			
+		int[] startPosition = new int[2];
+		int[] startInformation = rpiMgr.getStartPositionFromAndroid();
+		
+		// Setting up robot position
+		startPosition[0] = startInformation[0];
+		startPosition[1] = startInformation[1];
+		robot.setCurrentPosition(startPosition);
+
+		int directionOfRobotHead = startInformation[2];
+		robot.setRobotHead(directionOfRobotHead);
+
+		// reset robot position
+		resetRobotPosition(startInformation);
+		
+		appendMessage("Start Robot Position(r;c): "+ robot.getCurrentPosition()[0] + " ; " +  robot.getCurrentPosition()[1]);
+		appendMessage("Start Robot Degree: " + robot.getRobotHead());
+		
+		// Actual Waypoint coord from android
+		wayPoint = rpiMgr.getWayPointromAndroid();
+		appendMessage("WayPoint coordinate from Android: " + wayPoint[0] + " ; " + wayPoint[1]);
+		jlWayPoint.setText("WP Cord: " + wayPoint[0] + "," + wayPoint[1]);
+
+		// create algo object
+		// get intial sensor data
+		RealAlgorithmManager.sensorData = rpiMgr.getSensorReading();
+		realAlgoMgr = new RealAlgorithmManager(robot, arena, wayPoint, rpiMgr);
+		updateRobotPosition();
+		
+
+		updateRobotPosition();     
+		appendMessage("Robot is ready for execution, awaiting command to explore!");
+				
+		String input = rpiMgr.getInstructionFromAndroid();
+		if(input.equals("EX")){
+			realAlgoMgr.realGo();		
+		}
+	}
+	
 	/*
 	 * ACTIONLISTENER IMPLEMENTATION OVER HERE
 	 * 
@@ -560,78 +612,36 @@ public class Arena extends JFrame implements RobotArenaProtocol{
  				isRealRunNow  = true;
  				btnSimExp.setEnabled(false);
  				btnSimFP.setEnabled(false);
- 				
+ 				appendMessage("Mode: Real Run Mode");
+ 
  				resetArena();
  				removeMouseListener();
  				resetRobotPosition();
 				
- 				setupRealRun();	
- 				
+ 				thread = new Thread(new Runnable() {  
+ 			        public void run() {
+ 		 				setupRealRun();	
+ 			       }
+ 			    }  );
+ 			    thread.setPriority(Thread.NORM_PRIORITY);  
+ 			    thread.start();
  			}
  			else{
- 				isRealRunNow  = false;	
- 				Arena.appendMessage("Mode: Simulation Mode");
+ 				isRealRunNow  = false;
+ 				rpiMgr.disconnect();
+ 				rpiMgr = null;
  				btnSimExp.setEnabled(true);
- 				btnSimFP.setEnabled(true);;
+ 				btnSimFP.setEnabled(false);
  				
+ 				appendMessage("Mode: Simulation mode Run Mode");
  				resetArena();
- 				addMouseListener();
- 				setStartGoalZone();
- 				arena.updateRobotPosition();
+ 				removeMouseListener();
+ 				resetRobotPosition();
+				simAlgoMgr.resetAlgo();
  			}
  		}
 
-		private void setupRealRun() {
-			// TODO Auto-generated method stub
 
-			rpiMgr = new RpiManager();
-			
-			int[] startPosition = new int[2];
-			int[] startInformation = rpiMgr.getStartPositionFromAndroid();
-			
-			// Setting up robot position
-			startPosition[0] = startInformation[0];
-			startPosition[1] = startInformation[1];
-			robot.setCurrentPosition(startPosition);
-
-			int directionOfRobotHead = startInformation[2];
-			robot.setRobotHead(directionOfRobotHead);
-
-			// reset robot position
-			resetRobotPosition(startInformation);
-			
-			Arena.appendMessage("Start Robot Position(r;c): "+ robot.getCurrentPosition()[0] + " ; " +  robot.getCurrentPosition()[1]);
-			Arena.appendMessage("Start Robot Degree: " + robot.getRobotHead());
-			
-			// Actual Waypoint coord from android
-			wayPoint = rpiMgr.getWayPointromAndroid();
-			Arena.appendMessage("WayPoint coordinate from Android: " + wayPoint[0] + " ; " + wayPoint[1]);
-			jlWayPoint.setText("WayPoint Coord(r/c): " + wayPoint[0] + "," + wayPoint[1]);
-
-			// create algo object
-			realAlgoMgr = new RealAlgorithmManager(robot, arena, wayPoint, rpiMgr);
-			updateRobotPosition();
-			appendMessage("Mode: Real Run Mode");	
-			Arena.appendMessage("Robot is ready for execution, awaiting command to explore!");
-					
-			String input = rpiMgr.getInstructionFromAndroid();
-			if(input.equals("EX")){
-				realAlgoMgr.realGo();	
-				
-				//input = rpiMgr.getInstructionFromAndroid();
-				if(input.equals("FP")){
-					Arena.appendMessage("Starting Fastest Path(via WayPoint)...");
-						realAlgoMgr.fpgo(arenaReal);
-				}
-			}
-					
-			//input = rpiMgr.getInstructionFromAndroid();
-			if(input.equals("FP")){
-				Arena.appendMessage("Starting Fastest Path(via WayPoint)...");
-					realAlgoMgr.fpgo(arenaReal);
-			}
-
-		}
  	}
 	
 	class SimExplorationHandler implements ActionListener
@@ -653,7 +663,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 			simAlgoMgr.setCoveredPercentage(coveredPercentage);
 			simAlgoMgr.simGo();
 			
-			isSimulationDone = true;
+			isExplorationDone = true;
 		}
 	}
 	
@@ -663,7 +673,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		{
 			String msg1 = "Pls run FP Algo after exploring!\n";
 			String msg2 = "Starting fastest path now...\n";
-			if(isSimulationDone == false){
+			if(isExplorationDone == false){
 				JOptionPane.showMessageDialog(null, "Fastest Path can only be run after exploration is done");
 				appendMessage(msg1);
 
@@ -686,7 +696,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 			
 			jlbCoveragePercent.setText("Explored Coverage: 0%");
 
-			isSimulationDone = false;
+			isExplorationDone = false;
 			appendMessage("Successfully reset arena!");
 		}
 	}
@@ -731,8 +741,8 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 			// remove the first and last 2 char.
 			exploreResult = exploreResult.substring(2, exploreResult.length()-2);
 			
-			for(int i = RobotArenaProtocol.ROW-1; i >= 0; i--){
-				for(int j = 0; j < RobotArenaProtocol.COLUMN; j++){
+			for(int i = ROW-1; i >= 0; i--){
+				for(int j = 0; j < COLUMN; j++){
 					if(exploreResult.charAt(exploreIndex) =='1'){
 						// if visited
 						arenaDesign[i][j].setGridStatus(exploreResult.charAt(exploreIndex), Character.getNumericValue(obstacleResult.charAt(obstacleIndex)));

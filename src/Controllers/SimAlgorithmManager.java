@@ -64,7 +64,8 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				int x = robot.getCurrentPosition()[0];
 				int y = robot.getCurrentPosition()[1];
 			
-				if(goStraight){
+				
+				if(goStraight  && !(this.frontIsBlocked())){
 					robot.goStraight();
 					goStraight = false;
 				} else if(!this.leftIsBlocked()){
@@ -337,33 +338,16 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 
 		}	
 		
-		String newPath = "";
 		for(int j = 0; j < robotPath.length(); j++){
 			switch (robotPath.charAt(j)){
 			case 'D':
 				robot.turnRight();
-				newPath += TURNRIGHT;
 				break;
 			case 'A':
 				robot.turnLeft();
-				newPath += TURNLEFT;
 				break;
 			case 'W':
-				int counter = 1;
-				for(int a = j+1; a <robotPath.length();a++){
-					if(robotPath.charAt(a) == 'W'){
-						robot.goStraight();
-						arena.updateRobotPosition();
-						counter++;
-						j++;
-						if(counter>=7)
-							break;
-					}
-					else
-						break;
-				}
 				robot.goStraight();
-				newPath += FORWARD + counter;
 				break;
 			case 'B':
 				robot.turnBack();
@@ -371,7 +355,7 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				default:
 					
 			}
-			Arena.appendMessage("Current Pos: " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1]);
+			Arena.appendMessage(robot.getCurrentPosition()[0] +", " + robot.getCurrentPosition()[1]);
 
 			try {
 				Thread.sleep(1000/speed);
@@ -380,7 +364,7 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 			}
 			arena.updateRobotPosition();
 		}
-		return newPath;
+		return robotPath;
 	}
 
 	public void fpgo(final Grid[][] grid){
@@ -399,7 +383,6 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 		        	fastestString += getFastestPath(grid);
 		        	
 		        	Arena.appendMessage("Fastest Path: " + fastestString);
-
 		        }
 		    }  );
 		    thread.setPriority(Thread.NORM_PRIORITY);  
@@ -425,8 +408,7 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 					}
 				}
 			}
-			if(points.size() > 0)
-			{
+			if(points.size() > 0){
 				//find fastest path to the cells+direction, return lowest cost path STRING
 				cleanupExploration(grid, points);
 			}
@@ -542,7 +524,6 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 
 	}
 	
-	//receive a single point, and return accessible points from NSEW, return value: int[index][point 0=row, 1=col][direction]
 	private int[][] getAccessibleGrids(int[] points){
 		int count =0;
 		int[][] toBeExploredPoints = new int[24][3];

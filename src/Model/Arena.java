@@ -64,7 +64,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
     // UI Var
 	JPanel jpManual,jpSub1, jpSub2, jpSub3, jpArenaSub, jpLeft, jpRight, jpLeftMap, jpRightMap, jpToplabel;
 	JButton btnSwitchSimOrReal, btnRealExp, btnRealFP, btnSimExp, btnSimFP, btnReset, btnImport, btnSimExport,btnEnableCoverageTerminal, btnEnableTimeLimitTerminal;
-	JLabel jlbTimeLimit, jlArenaDesign, jlTimeCost, jlSpeed, jlbExpCoverage, jlbCoveragePercent, jlbTerminal, jlbTerminal2, jlConsoleArea, jlWayPoint;
+	JLabel jlbTimeLimit, jlArenaDesign, jlTimeCost, jlSpeed, jlbExpCoverage, jlbCoveragePercent, jlbTerminal, jlbTerminal2, jlConsoleArea, jlWayPoint,jlbTimeCoverage;
 	JTextField jtfExplorationCoverage;
 	static JTextArea textbox;
 	JComboBox jcbSpeed;
@@ -75,7 +75,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	public Arena(Robot robot)
 	{	
 		// Demo waypoint
-		wayPoint[0] = 5;
+		wayPoint[0] = 11;
 		wayPoint[1] = 9;
 		
 		// Setup UI for arena
@@ -122,6 +122,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	   	jlbTimeLimit = new JLabel("Time limit (sec):");
 
 	   	jlArenaDesign = new JLabel("Design arena area:");
+	   	jlbTimeCoverage = new JLabel("Current Exploration Time:");
 
 	   	jlSpeed = new JLabel("Speed (# of step/sec):");
 	   	jlWayPoint = new JLabel("WP Cord: " + wayPoint[0] + "," + wayPoint[1]);
@@ -214,8 +215,9 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	   	jpSub2.add(btnImport);
 	   	jpSub2.add(btnSimExport);
 	   	
-	    jpToplabel = new JPanel(new GridLayout(1,1));
+	    jpToplabel = new JPanel(new GridLayout(2,1));
 	    jpToplabel.add(jlbCoveragePercent);
+	    jpToplabel.add(jlbTimeCoverage);
 	
 	   	jpLeft.add(jpLeftMap,BorderLayout.SOUTH);
 	   	jpLeft.add(jlArenaDesign,BorderLayout.NORTH);
@@ -444,7 +446,8 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 			for(int i = 0; i < 6;i++){
 				sensorResult[i] = Integer.parseInt(sensorData[i]);
 			}
-			robot.getSensorsData(arenaReal, sensorResult);
+			//robot.getSensorsData(arenaReal, sensorResult);
+			robot.getSensorsDataWithUpdate(arenaReal, sensorResult);
 		}
 		else
 			robot.getSensorsData(arenaReal);
@@ -481,11 +484,16 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		textbox.append(message);
 	}
 	
-	public void startTimer() throws ParseException
+	public void startTimer() 
 	{
 		startTime = -1;
 	   	format.setTimeZone(TimeZone.getTimeZone("GMT"));
-		date = format.parse(jtfTimeLimit.getText());
+		try {
+			date = format.parse(jtfTimeLimit.getText());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		duration = date.getTime();
 		
 		 timer = new Timer(10, new ActionListener() {
@@ -517,8 +525,9 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	
 	public void updateCoverageAndTime(){
 		double result = calculateExploredPercentage();
+		double time = 0;
 		jlbCoveragePercent.setText("Explored Coverage: "+result+"%");
-
+		jlbTimeCoverage.setText("Current Exoloration Time:" + time);
 	}
 
 	public double calculateExploredPercentage(){
@@ -539,18 +548,31 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		rpiMgr = new RpiManager();
 		// TODO Auto-generated method stub			
 		int[] startPosition = new int[2];
+		
+		// For REAL RUN
 		int[] startInformation = rpiMgr.getStartPositionFromAndroid();
 		
 		// Setting up robot position
 		startPosition[0] = startInformation[0];
 		startPosition[1] = startInformation[1];
 		robot.setCurrentPosition(startPosition);
-
+		
 		int directionOfRobotHead = startInformation[2];
 		robot.setRobotHead(directionOfRobotHead);
+		
+		
+		// Run without tablet
+		/*
+		wayPoint[0] = 15;
+		wayPoint[1] = 6;
+		startPosition[0] = 18;
+		startPosition[1] = 1;
+		robot.setRobotHead(180);
+		robot.setCurrentPosition(startPosition);
+		 */
 
 		// reset robot position
-		resetRobotPosition(startInformation);
+		resetRobotPosition(startPosition);
 		
 		appendMessage("Start Robot Position(r;c): "+ robot.getCurrentPosition()[0] + " ; " +  robot.getCurrentPosition()[1]);
 		appendMessage("Start Robot Degree: " + robot.getRobotHead());
@@ -565,14 +587,22 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		RealAlgorithmManager.sensorData = rpiMgr.getSensorReading();
 		realAlgoMgr = new RealAlgorithmManager(robot, arena, wayPoint, rpiMgr);
 		updateRobotPosition();
-		
-
-		updateRobotPosition();     
+	
+		updateRobotPosition();
+	
+		// pre-run calibration
+		rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+		rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
+		rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+		rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT);
+		// turn to north
+		robot.turnBack();
+		arena.updateRobotPosition();
 		appendMessage("Robot is ready for execution, awaiting command to explore!");
 				
 		String input = rpiMgr.getInstructionFromAndroid();
 		if(input.equals("EX")){
-			realAlgoMgr.realGo();		
+			realAlgoMgr.realGo();	
 		}
 	}
 	
@@ -610,8 +640,8 @@ public class Arena extends JFrame implements RobotArenaProtocol{
  			//TODO, switch to block design arena
  			if(!isRealRunNow){				
  				isRealRunNow  = true;
- 				btnSimExp.setEnabled(false);
- 				btnSimFP.setEnabled(false);
+ 				btnSimExp.setEnabled(true);
+ 				btnSimFP.setEnabled(true);
  				appendMessage("Mode: Real Run Mode");
  
  				resetArena();
@@ -652,17 +682,15 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 			int speed = Integer.parseInt(jcbSpeed.getSelectedItem().toString());
 			int coveredPercentage = Integer.parseInt(jtfExplorationCoverage.getText().toString());
 			if(simAlgoMgr.getTimerTerminal()){
-				try {
-					startTimer();
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				startTimer();
 			}
 			simAlgoMgr.setSpeed(speed);
 			simAlgoMgr.setCoveredPercentage(coveredPercentage);
-			simAlgoMgr.simGo();
-			
+			if (!isRealRunNow)
+				simAlgoMgr.simGo();
+			else
+				realAlgoMgr.realGo();
+
 			isExplorationDone = true;
 		}
 	}
@@ -674,14 +702,18 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 			String msg1 = "Pls run FP Algo after exploring!\n";
 			String msg2 = "Starting fastest path now...\n";
 			if(isExplorationDone == false){
-				JOptionPane.showMessageDialog(null, "Fastest Path can only be run after exploration is done");
 				appendMessage(msg1);
+			}
 
-			}
-			else{
-				appendMessage(msg2);
+				
+			if (!isRealRunNow)
 				simAlgoMgr.fpgo(arenaReal);
+			else {
+				Arena.appendMessage("Executing FP now..");
+				// Execute Fastest String WITH NO ACKNOWLEDGEMENT
+				rpiMgr.sendInstruction(AUDUINO + RealAlgorithmManager.fastestString);
 			}
+        
 		}
 	}
 
@@ -788,7 +820,6 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	}
 
 	public void allowFastestPath(boolean result) {
-		// TODO Auto-generated method stub
 		if(result)
 			btnSimFP.setEnabled(true);
 		else

@@ -1,12 +1,14 @@
 package Model;
 
+import Controllers.RealAlgorithmManager;
+
 public class Robot implements RobotArenaProtocol{
-	
+
 	private int[] curPosition = new int[2];
 	private int[] prevPosition = new int[2];
 	private int robotHead;
 	public static int[][] sensorDataRecord = new int[ROW][COLUMN];
-	
+
 	public Robot(int[] startPosition, int robotHead)
 	{
 		this.curPosition = startPosition;
@@ -24,33 +26,33 @@ public class Robot implements RobotArenaProtocol{
 			for(int j = 0; j< COLUMN; j++)
 				sensorDataRecord[i][j] = 10;
 	}
-	
+
 	public int[] getCurrentPosition(){
 		return this.curPosition;
 	}
-	
+
 	public void setCurrentPosition(int[] newPosition){
 		this.curPosition[0] = newPosition[0];
 		this.curPosition[1] = newPosition[1];
 	}
-	
+
 	public int[] getPreviousPosition(){
 		return this.prevPosition;
 	}
-	
+
 	public void setPreviousPosition(int[] prevPosition){
 		this.prevPosition[0] = prevPosition[0];
 		this.prevPosition[1] = prevPosition[1];	
 	}
-	
+
 	public int getRobotHead(){
 		return robotHead;
 	}
-	
+
 	public void setRobotHead(int robotHead){
 		this.robotHead = robotHead;
 	}
-	
+
 	public void goStraight(){
 		prevPosition[0] = curPosition[0];
 		prevPosition[1] = curPosition[1];
@@ -69,7 +71,7 @@ public class Robot implements RobotArenaProtocol{
 			break;
 		}
 	}
-	
+
 	public void turnLeft()
 	{
 		switch (robotHead) {
@@ -87,7 +89,7 @@ public class Robot implements RobotArenaProtocol{
 			break;
 		}
 	}
-	
+
 	public void turnRight()
 	{
 		switch (robotHead) {
@@ -105,7 +107,7 @@ public class Robot implements RobotArenaProtocol{
 			break;
 		}
 	}
-	
+
 	public void turnBack()
 	{
 		switch (robotHead) {
@@ -123,14 +125,14 @@ public class Robot implements RobotArenaProtocol{
 			break;
 		}
 	}
-	
+
 	private static boolean notInsideArena(int row, int column) {
 		if(row<= 0 || row>= ROW-1 || column <= 0 || column >= COLUMN-1)
 			return true;
 		else
 			return false;
 	}
-	
+
 	public boolean positionInsideArena(int row, int column)
 	{
 		if(row >= 0 && row <= ROW-1 && column >= 0 && column <= COLUMN-1)
@@ -138,7 +140,7 @@ public class Robot implements RobotArenaProtocol{
 		else
 			return false;
 	}
-	
+
 	public static boolean isMovable(int row, int column, Grid[][] grid, int robotHead)
 	{	
 		switch (robotHead) {
@@ -155,7 +157,7 @@ public class Robot implements RobotArenaProtocol{
 			column--;
 			break;
 		}
-		
+
 		if(notInsideArena(row, column))
 			return false;
 		else{
@@ -183,7 +185,7 @@ public class Robot implements RobotArenaProtocol{
 			column--;
 			break;
 		}
-		
+
 		if(notInsideArena(row, column))
 			return false;
 		else{
@@ -194,11 +196,11 @@ public class Robot implements RobotArenaProtocol{
 		}
 		return true;
 	}
-	
+
 	public boolean canFrontCalibrate(int row, int column, Grid[][] grid, int robotHead)
 	{
 		switch (robotHead) {
-	
+
 		case NORTH:
 			row--;
 			break;
@@ -253,7 +255,7 @@ public class Robot implements RobotArenaProtocol{
 			row--;
 			break;
 		}
-		
+
 		if(notInsideArena(row, column))
 			return true;
 		else
@@ -282,7 +284,7 @@ public class Robot implements RobotArenaProtocol{
 		}
 		return false;
 	}
-	
+
 	public boolean canLeftCalibrate(int row, int column, Grid[][] grid, int robotHead)
 	{
 		switch (robotHead){
@@ -319,11 +321,11 @@ public class Robot implements RobotArenaProtocol{
 				if(grid[row+1][column-1].getGridStatus()[1] == 1 && grid[row+1][column+1].getGridStatus()[1] == 1)
 					return true; 
 				break;
-		}
+			}
 		}
 		return false;
 	}
-	
+
 	/*
 	 * Soft Simulation
 	 */
@@ -335,7 +337,7 @@ public class Robot implements RobotArenaProtocol{
 		this.getLeftSensorData(grid);
 		this.getRightSensorData(grid);
 	}
-	
+
 	private void getFrontSensor1Data(Grid[][] grid) {
 		boolean obstacleDetected = false;
 		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
@@ -361,7 +363,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]+1)){
 					if(grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED)
@@ -385,7 +387,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0]-1,curPosition[1]+2+i)){
 					if(grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED)
@@ -409,7 +411,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case WEST:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-i)){
 					if(grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED)
@@ -439,7 +441,7 @@ public class Robot implements RobotArenaProtocol{
 
 		}
 	}
-	
+
 	private void getFrontSensor2Data(Grid[][] grid) {
 		boolean obstacleDetected = false;
 		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
@@ -467,7 +469,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1])){
 					if(grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == NOT_VISITED)
@@ -491,7 +493,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0],curPosition[1]+2+i)){
 					if(grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED)
@@ -515,7 +517,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case WEST:
 				if(positionInsideArena(curPosition[0],curPosition[1]-2-i)){
 					if(grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED)
@@ -545,7 +547,7 @@ public class Robot implements RobotArenaProtocol{
 
 		}
 	}
-	
+
 	private void getFrontSensor3Data(Grid[][] grid) {
 		boolean obstacleDetected = false;
 		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
@@ -573,7 +575,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
 					if(grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED)
@@ -597,7 +599,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]+2+i)){
 					if(grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED)
@@ -650,7 +652,7 @@ public class Robot implements RobotArenaProtocol{
 
 		}
 	}
-	
+
 	private void getLeftSensorData(Grid[][] grid) {
 		boolean obstacleDetected = false;
 		for (int i = 0; i < LONGRANGE_SENSOR_MAXIMUM_DISTANCE; i++) {
@@ -678,7 +680,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]+2+i)){
 					if(grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED)
@@ -702,7 +704,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]+1)){
 					if(grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED)
@@ -726,7 +728,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case WEST:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
 					if(grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED)
@@ -756,7 +758,7 @@ public class Robot implements RobotArenaProtocol{
 
 		}
 	}
-		
+
 	private void getRightSensorData(Grid[][] grid) {
 		boolean obstacleDetected = false;
 		for (int i = 0; i < LONGRANGE_SENSOR_MAXIMUM_DISTANCE; i++) {
@@ -784,7 +786,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-i)){
 					if(grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED)
@@ -808,7 +810,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]+1)){
 					if(grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED)
@@ -832,7 +834,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case WEST:
 				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]-1)){
 					if(grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED)
@@ -862,7 +864,7 @@ public class Robot implements RobotArenaProtocol{
 
 		}
 	}
-	
+
 	public void turnToNorth()
 	{
 		switch (this.robotHead) {
@@ -892,8 +894,8 @@ public class Robot implements RobotArenaProtocol{
 				return RobotArenaProtocol.TURNRIGHT;
 			case Robot.NORTH:
 				return RobotArenaProtocol.TURNLEFT;
-				default:
-					System.out.println("error: turntoreqDirection");
+			default:
+				System.out.println("error: turntoreqDirection");
 			}
 			break;
 		case Robot.WEST:
@@ -906,8 +908,8 @@ public class Robot implements RobotArenaProtocol{
 				return RobotArenaProtocol.TURNLEFT;
 			case Robot.NORTH:
 				return RobotArenaProtocol.TURNRIGHT;
-				default:
-					System.out.println("error: turntoreqDirection");
+			default:
+				System.out.println("error: turntoreqDirection");
 			}
 			break;
 		case Robot.SOUTH:
@@ -920,8 +922,8 @@ public class Robot implements RobotArenaProtocol{
 				return "";
 			case Robot.NORTH:
 				return RobotArenaProtocol.TURNBACK;
-				default:
-					System.out.println("error: turntoreqDirection");
+			default:
+				System.out.println("error: turntoreqDirection");
 			}
 			break;
 		case Robot.NORTH:
@@ -934,16 +936,16 @@ public class Robot implements RobotArenaProtocol{
 				return RobotArenaProtocol.TURNBACK;
 			case Robot.NORTH:
 				return "";
-				default:
-					System.out.println("error: turntoreqDirection");
-			}
-			break;
 			default:
 				System.out.println("error: turntoreqDirection");
+			}
+			break;
+		default:
+			System.out.println("error: turntoreqDirection");
 		}
 		return null;
 	}
-	
+
 	public String turnString(int[] prevPos, int[] curPos, int curO){
 		switch(curO){
 		case Robot.EAST:
@@ -970,12 +972,12 @@ public class Robot implements RobotArenaProtocol{
 				else return RobotArenaProtocol.TURNLEFT;
 			}
 			return "";
-			default:
-				System.out.println("error: turnString");
+		default:
+			System.out.println("error: turnString");
 		}
 		return "";
 	}
-	
+
 	public int getDirAfterRightTurn(int cur0)
 	{
 		switch (cur0) {
@@ -990,7 +992,7 @@ public class Robot implements RobotArenaProtocol{
 		}
 		return 0;
 	}
-	
+
 	public int getDirAfterLeftTurn(int cur0)
 	{
 		switch (cur0) {
@@ -1018,12 +1020,103 @@ public class Robot implements RobotArenaProtocol{
 		this.getFrontSensor3Data(grid, distance[3]);
 		// right sensor
 		this.getRightSensorData(grid, distance[4], distance[5]);
-		
+
 	}
-	
+
+	private void getFrontLeftWithUpdate(Grid[][] grid, int obstacleDistance){
+		boolean obstacleDetected = false;
+		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
+			switch (this.robotHead) {
+			case NORTH:
+				// check if the position is inside the arena
+				if (positionInsideArena(curPosition[0]-2-i, curPosition[1]-1)){
+					if((grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+				}
+				break;
+
+			case SOUTH:
+				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]+1)){
+					if((grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[1] == OBSTACLE && grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == VISITED) 
+							|| grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+				}
+				break;
+
+			case EAST:
+				if(positionInsideArena(curPosition[0]-1,curPosition[1]+2+i)){
+					if((grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+
+						if (grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+					
+					break;
+				}
+			case WEST:
+				if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-i)){
+					if((grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						if(i == obstacleDistance){
+							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+
+				}
+				break;
+			}	
+			if(obstacleDetected){
+				break;
+			}
+		}
+	}
+
 	private void getFrontSensor1Data(Grid[][] grid, int obstacleDistance) {
 		boolean obstacleDetected = false;
-		
+
 		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
 			switch (this.robotHead) {
 			case NORTH:
@@ -1031,13 +1124,12 @@ public class Robot implements RobotArenaProtocol{
 					if(grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED){
 						if(i == obstacleDistance){
 							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
-							//sensorDataRecord[curPosition[0]-2-i][curPosition[1]-1] = 1;//update sensor data record;
 							obstacleDetected = true;
-
 						}
 						else{
 							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else{
 						if(grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[1]== OBSTACLE){
@@ -1046,7 +1138,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]+1)){
 					if(grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED)
@@ -1058,6 +1150,7 @@ public class Robot implements RobotArenaProtocol{
 						else{
 							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else{
 						if(grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[1]== OBSTACLE){
@@ -1066,7 +1159,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0]-1,curPosition[1]+2+i)){
 					if(grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED)
@@ -1078,6 +1171,7 @@ public class Robot implements RobotArenaProtocol{
 						else{
 							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1088,7 +1182,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case WEST:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-i)){
 					if(grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED)
@@ -1102,6 +1196,8 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
+
 					}
 					else
 					{
@@ -1113,6 +1209,103 @@ public class Robot implements RobotArenaProtocol{
 				}
 				break;
 			}
+			if(obstacleDetected)
+				break;
+
+		}
+	}
+
+	private void getFrontMidWithUpdate(Grid[][] grid, int obstacleDistance){
+		boolean obstacleDetected = false;
+		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
+			switch (this.robotHead) {
+			case NORTH:
+				if(positionInsideArena(curPosition[0]-2-i,curPosition[1])){
+					if((grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
+					
+						if (grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]-2-i][curPosition[1]].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]-2-i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+
+				}	
+				break;
+
+			case SOUTH:
+				if(positionInsideArena(curPosition[0]+2+i,curPosition[1])){
+					if((grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == VISITED && grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance)
+						{
+							grid[curPosition[0]+2+i][curPosition[1]].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else
+						{
+							grid[curPosition[0]+2+i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+						
+				}
+				break;
+
+			case EAST:
+				if(positionInsideArena(curPosition[0],curPosition[1]+2+i)){
+					if((grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+					
+						if (grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+						
+					}
+				break;
+
+			case WEST:
+				if(positionInsideArena(curPosition[0],curPosition[1]-2-i)){
+					if((grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+						
+
+				}
+				break;
+		}
 			if(obstacleDetected)
 				break;
 
@@ -1136,6 +1329,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-2-i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1146,7 +1340,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1])){
 					if(grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == NOT_VISITED)
@@ -1160,6 +1354,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+2+i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1170,7 +1365,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0],curPosition[1]+2+i)){
 					if(grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED)
@@ -1184,6 +1379,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1194,7 +1390,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case WEST:
 				if(positionInsideArena(curPosition[0],curPosition[1]-2-i)){
 					if(grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED)
@@ -1208,6 +1404,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1223,6 +1420,100 @@ public class Robot implements RobotArenaProtocol{
 				break;
 
 		}
+	}
+
+	private void getFrontRightWithUpdate(Grid [][] grid,  int obstacleDistance){
+		boolean obstacleDetected = false;
+		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
+			switch (this.robotHead) {
+			case NORTH:
+				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]+1)){
+					
+					if((grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+
+				}
+				break;
+
+			case SOUTH:
+				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
+					if((grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == VISITED && grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
+					
+						if (grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+	
+				}
+				break;
+
+			case EAST:
+				if(positionInsideArena(curPosition[0]+1,curPosition[1]+2+i)){
+					if((grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
+						}	
+					}
+
+				}
+				break;
+				
+			case WEST:
+				if(positionInsideArena(curPosition[0]-1,curPosition[1]-2-i)){
+					if((grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+					
+						if (grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
+						}	
+					}
+				}
+				break;
+			}
+			if(obstacleDetected){
+				break;
+			}
+		}		
 	}
 	
 	private void getFrontSensor3Data(Grid[][] grid, int obstacleDistance) {
@@ -1243,6 +1534,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1253,7 +1545,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
 					if(grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED)
@@ -1267,6 +1559,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1277,7 +1570,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]+2+i)){
 					if(grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED)
@@ -1291,6 +1584,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1314,6 +1608,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1330,7 +1625,7 @@ public class Robot implements RobotArenaProtocol{
 
 		}
 	}
-	
+
 	private void getLeftSensorData(Grid[][] grid, int obstacleDistance) {
 		boolean obstacleDetected = false;
 		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
@@ -1348,6 +1643,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1358,7 +1654,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]+2+i)){
 					if(grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED)
@@ -1372,6 +1668,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1382,7 +1679,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]+1)){
 					if(grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED)
@@ -1396,6 +1693,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1406,7 +1704,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case WEST:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
 					if(grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED)
@@ -1420,6 +1718,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1436,7 +1735,108 @@ public class Robot implements RobotArenaProtocol{
 
 		}
 	}
-		
+
+	private void getLeftSensorDataWithUpdate(Grid[][] grid, int obstacleDistance) {
+		boolean obstacleDetected = false;
+		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
+			switch (this.robotHead) {
+			case NORTH:
+				if(positionInsideArena(curPosition[0]-1,curPosition[1]-2-i)){
+					
+					if((grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == VISITED 
+							&& grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE) 
+							|| grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+
+				}
+				break;
+
+			case SOUTH:
+				if(positionInsideArena(curPosition[0]+1,curPosition[1]+2+i)){
+					
+					if((grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == VISITED 
+							&& grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+
+				}
+				break;
+
+			case EAST:
+				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]+1)){
+					if((grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == VISITED 
+							&& grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+
+				}
+				break;
+
+			case WEST:
+				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
+					
+					if((grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == VISITED 
+							&& grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[1] == OBSTACLE)
+							|| grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
+						
+						if (grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
+							RealAlgorithmManager.visitedCounter++;
+						}
+						
+						if(i == obstacleDistance){
+							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
+							obstacleDetected = true;
+						}
+						else{
+							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
+						}
+					}
+
+				}
+				break;
+			}
+			if(obstacleDetected)
+				break;
+
+		}
+	}
+
 	private void getRightSensorData(Grid[][] grid, int obstacleDistance, int obstcaleDistance2) {
 		boolean obstacleDetected = false;
 		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
@@ -1454,6 +1854,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1464,7 +1865,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-i)){
 					if(grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED)
@@ -1478,6 +1879,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1488,7 +1890,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case EAST:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]+1)){
 					if(grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED)
@@ -1502,6 +1904,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1512,7 +1915,7 @@ public class Robot implements RobotArenaProtocol{
 					}
 				}
 				break;
-				
+
 			case WEST:
 				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]-1)){
 					if(grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED)
@@ -1526,6 +1929,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
+						RealAlgorithmManager.visitedCounter++;
 					}
 					else
 					{
@@ -1541,7 +1945,7 @@ public class Robot implements RobotArenaProtocol{
 				break;
 			}
 		}
-		
+
 		if(!obstacleDetected){
 			for (int i1 = 2; i1 < LONGRANGE_SENSOR_MAXIMUM_DISTANCE; i1++) {
 				if (obstacleDetected){
@@ -1561,6 +1965,7 @@ public class Robot implements RobotArenaProtocol{
 							{
 								grid[curPosition[0]-1][curPosition[1]+2+i1].setGridStatus(VISITED, NO_OBSTACLE);
 							}
+							RealAlgorithmManager.visitedCounter++;
 						}
 						else
 						{
@@ -1571,7 +1976,7 @@ public class Robot implements RobotArenaProtocol{
 						}
 					}
 					break;
-					
+
 				case SOUTH:
 					if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-i1)){
 						if(grid[curPosition[0]+1][curPosition[1]-2-i1].getGridStatus()[0] == NOT_VISITED)
@@ -1585,6 +1990,7 @@ public class Robot implements RobotArenaProtocol{
 							{
 								grid[curPosition[0]+1][curPosition[1]-2-i1].setGridStatus(VISITED, NO_OBSTACLE);
 							}
+							RealAlgorithmManager.visitedCounter++;
 						}
 						else
 						{
@@ -1595,7 +2001,7 @@ public class Robot implements RobotArenaProtocol{
 						}
 					}
 					break;
-					
+
 				case EAST:
 					if(positionInsideArena(curPosition[0]+2+i1,curPosition[1]+1)){
 						if(grid[curPosition[0]+2+i1][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED)
@@ -1609,6 +2015,7 @@ public class Robot implements RobotArenaProtocol{
 							{
 								grid[curPosition[0]+2+i1][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 							}
+							RealAlgorithmManager.visitedCounter++;
 						}
 						else
 						{
@@ -1619,7 +2026,7 @@ public class Robot implements RobotArenaProtocol{
 						}
 					}
 					break;
-					
+
 				case WEST:
 					if(positionInsideArena(curPosition[0]-2-i1,curPosition[1]-1)){
 						if(grid[curPosition[0]-2-i1][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED)
@@ -1633,6 +2040,7 @@ public class Robot implements RobotArenaProtocol{
 							{
 								grid[curPosition[0]-2-i1][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 							}
+							RealAlgorithmManager.visitedCounter++;
 						}
 						else
 						{
@@ -1648,365 +2056,15 @@ public class Robot implements RobotArenaProtocol{
 		}
 
 	}
-	
+
 	//For real run with update grid cell. Only use when update is required
 	public void getSensorsDataWithUpdate(Grid[][] grid, int[] distance){
-		this.getFrontSensor1DataWithUpdate(grid, distance[2]);
-		this.getFrontSensor2DataWithUpdate(grid, distance[1]);
-		this.getFrontSensor3DataWithUpdate(grid, distance[0]);		
-		this.getLeftSensorData(grid, distance[3]);
+		//this.getLeftSensorDataWithUpdate(grid, distance[0]);
+		this.getLeftSensorData(grid, distance[0]);
+		this.getFrontLeftWithUpdate(grid, distance[1]);
+		this.getFrontMidWithUpdate(grid, distance[2]);
+		this.getFrontRightWithUpdate(grid, distance[3]);		
 		this.getRightSensorData(grid, distance[4], distance[5]);
 	}
-	
-	private void getFrontSensor1DataWithUpdate(Grid[][] grid, int obstacleDistance) {
-		boolean obstacleDetected = false;
-		
-		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
-			switch (this.robotHead) {
-			case NORTH:
-				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]-1)){
-					if(sensorDataRecord[curPosition[0]-2-i][curPosition[1]-1] == 10)
-					{
-						if(i == obstacleDistance){
-							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]-1] = 1;//update sensor data record;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]-1] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]-2-i][curPosition[1]-1] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]-1] = 0;
-						}
-					}
-				}
-				break;
-				
-			case SOUTH:
-				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]+1)){
-					if(sensorDataRecord[curPosition[0]+2+i][curPosition[1]+1] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]+1] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]+1] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]+2+i][curPosition[1]+1] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]+1] = 0;
-						}
-					}
-				}
-				break;
-				
-			case EAST:
-				if(positionInsideArena(curPosition[0]-1,curPosition[1]+2+i)){
-					if(sensorDataRecord[curPosition[0]-1][curPosition[1]+2+i] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]-1][curPosition[1]+2+i] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-1][curPosition[1]+2+i] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]-1][curPosition[1]+2+i] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-1][curPosition[1]+2+i] = 0;
-						}
-					}
-				}
-				break;
-				
-			case WEST:
-				if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-i)){
-					if(sensorDataRecord[curPosition[0]+1][curPosition[1]-2-i] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]+1][curPosition[1]-2-i] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+1][curPosition[1]-2-i] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]+1][curPosition[1]-2-i] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+1][curPosition[1]-2-i] = 0;
-						}
-					}
-				}
-				break;
-			}
-			if(obstacleDetected)
-				break;
-		}
-	}
-	
-	private void getFrontSensor2DataWithUpdate(Grid[][] grid, int obstacleDistance) {
-		boolean obstacleDetected = false;
-		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
-			switch (this.robotHead) {
-			case NORTH:
-				if(positionInsideArena(curPosition[0]-2-i,curPosition[1])){
-					if(sensorDataRecord[curPosition[0]-2-i][curPosition[1]] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]-2-i][curPosition[1]].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]] = 1;//update sensor data record;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]-2-i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]-2-i][curPosition[1]] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]-2-i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]] = 0;
-						}
-					}
-				}
-				break;
-				
-			case SOUTH:
-				if(positionInsideArena(curPosition[0]+2+i,curPosition[1])){
-					if(sensorDataRecord[curPosition[0]+2+i][curPosition[1]] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]+2+i][curPosition[1]].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]+2+i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]+2+i][curPosition[1]] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]+2+i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]] = 0;
-						}
-					}
-				}
-				break;
-				
-			case EAST:
-				if(positionInsideArena(curPosition[0],curPosition[1]+2+i)){
-					if(sensorDataRecord[curPosition[0]][curPosition[1]+2+i] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]][curPosition[1]+2+i] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]][curPosition[1]+2+i] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]][curPosition[1]+2+i] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]][curPosition[1]+2+i] = 0;
-						}
-					}
-				}
-				break;
-				
-			case WEST:
-				if(positionInsideArena(curPosition[0],curPosition[1]-2-i)){
-					if(sensorDataRecord[curPosition[0]][curPosition[1]-2-i] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]][curPosition[1]-2-i] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]][curPosition[1]-2-i] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]][curPosition[1]-2-i] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]][curPosition[1]-2-i] = 0;
-						}
-					}
-				}
-				break;
-			}
-			if(obstacleDetected)
-				break;
 
-		}
-	}
-	
-	private void getFrontSensor3DataWithUpdate(Grid[][] grid, int obstacleDistance) {
-
-		boolean obstacleDetected = false;
-		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
-			switch (this.robotHead) {
-			case NORTH:
-				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]+1)){
-					if(sensorDataRecord[curPosition[0]-2-i][curPosition[1]+1] == 10){
-						if(i == obstacleDistance){
-							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]+1] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]+1] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]-2-i][curPosition[1]+1] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-2-i][curPosition[1]+1] = 0;
-						}
-					}
-				}
-				break;
-				
-			case SOUTH:
-				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
-					if(sensorDataRecord[curPosition[0]+2+i][curPosition[1]-1] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]-1] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]-1] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]+2+i][curPosition[1]-1] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+2+i][curPosition[1]-1] = 0;
-						}
-					}
-				}
-				break;
-				
-			case EAST:
-				if(positionInsideArena(curPosition[0]+1,curPosition[1]+2+i)){
-					if(sensorDataRecord[curPosition[0]+1][curPosition[1]+2+i] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]+1][curPosition[1]+2+i] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+1][curPosition[1]+2+i] = 0;
-						}
-					}
-					else if (sensorDataRecord[curPosition[0]+1][curPosition[1]+2+i] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]+1][curPosition[1]+2+i] = 0;
-						}
-					}
-				}
-				break;
-			case WEST:
-				if(positionInsideArena(curPosition[0]-1,curPosition[1]-2-i)){
-					if(sensorDataRecord[curPosition[0]-1][curPosition[1]-2-i] == 10)
-					{
-						if(i == obstacleDistance)
-						{
-							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
-							sensorDataRecord[curPosition[0]-1][curPosition[1]-2-i] = 1;
-							obstacleDetected = true;
-						}
-						else
-						{
-							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-1][curPosition[1]-2-i] = 0;
-						}
-					}
-					else if(sensorDataRecord[curPosition[0]-1][curPosition[1]-2-i] == 1)
-					{
-						if(i != obstacleDistance)
-						{
-							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
-							sensorDataRecord[curPosition[0]-1][curPosition[1]-2-i] = 0;
-						}
-					}
-				}
-				break;
-			}
-			if(obstacleDetected)
-				break;
-
-		}
-	}
-		
 }

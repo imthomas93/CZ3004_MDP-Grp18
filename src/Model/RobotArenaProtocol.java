@@ -30,7 +30,7 @@ public interface RobotArenaProtocol{
 	
 	// SENSOR DETAIlS
 	static final int SHROTRANGE_SENSOR_DISTANCE = 2;
-	static final int LONGRANGE_SENSOR_MAXIMUM_DISTANCE = 5 ;
+	static final int LONGRANGE_SENSOR_MAXIMUM_DISTANCE = 4;
 	
 	// ARENA UI COLOR CODE
 	static final Color STARTZONECOLOR = Color.PINK;
@@ -50,7 +50,8 @@ public interface RobotArenaProtocol{
 	 static final String TURNRIGHT = "D";
 	 static final String TURNBACK = "B";
 	 static final String SCANARENA = "S";
-	 static final String CALIBRATE = "C";		
+	 static final String CALIBRATE = "C";
+	 static final String FUCKINGFAST = "F";
 	 static final String TABLET = "T";
 	 static final String AUDUINO = "A";
 	 static final String RPI = "R";		

@@ -182,6 +182,23 @@ public class Utilities {
 				e.printStackTrace();
 			}
 
-		}	
+		}
+		
+		public void playExploreSound() {
+			// TODO Auto-generated method stub
+			try {
+				File audioFile = new File("Explore.m4a");
+				 
+				AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+				AudioFormat format = audioStream.getFormat();
+				DataLine.Info info = new DataLine.Info(Clip.class, format);
+				Clip audioClip = (Clip) AudioSystem.getLine(info);
+				audioClip.open(audioStream);
+				audioClip.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
 
 }

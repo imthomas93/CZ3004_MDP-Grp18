@@ -31,6 +31,7 @@ public class RpiManager implements RobotArenaProtocol {
 	public void sendInstruction(String instruction) {
 		// THIS METHOD SEND INSTRUCTION WITHOUT THE NEED TO WAIT FOR ACKNOWLEDGEMENT
 		try{
+			instruction += "#";
 			instruction = instruction.trim();
 			SocketClientManager.writeToSocket(instruction);
 			TimeUnit.NANOSECONDS.sleep(100);
@@ -43,8 +44,8 @@ public class RpiManager implements RobotArenaProtocol {
 	public void sendInstruction2(String instruction) {
 		// THIS METHOD SEND INSTRUCTION WITH THE NEED TO WAIT FOR ACKNOWLEDGEMENT
 		try{
-			instruction = instruction.trim();
-			
+			instruction += "#";
+			instruction = instruction.trim();			
 			SocketClientManager.writeToSocket(instruction);
 			while(true){
 				synchronized(socketThread){
@@ -71,6 +72,7 @@ public class RpiManager implements RobotArenaProtocol {
 	public void sendInstruction3(String instruction) {
 		// THIS METHOD SEND INSTRUCTION WITH THE NEED TO WAIT FOR ACKNOWLEDGEMENT
 		try{
+			instruction += "#";
 			instruction = instruction.trim();
 			
 			SocketClientManager.writeToSocket(instruction);
@@ -165,7 +167,6 @@ public class RpiManager implements RobotArenaProtocol {
 		
 		return andoridInput;
 	}
-
 
 	public String getSensorReading() {
 		// Return intial sensor reading then robot is ready

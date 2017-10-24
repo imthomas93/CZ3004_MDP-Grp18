@@ -732,7 +732,29 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 
 	private String generateMsgToTablet2() {
 		String output = "";
-		output = TABLET +"@" + arenaInforToStringVisited() + "@" + arenaInforToStringObstacle();
+		
+		String hexResult = "";
+		String hexResult2 = "";
+		String binResult = "";
+		
+		for(int i = ROW-1; i >= 0; i--){
+			for(int j = 0; j < COLUMN; j++){
+				binResult = binResult + grid[i][j].getGridStatus()[0];
+			}
+		}
+		binResult = "11" + binResult + "11";
+		hexResult = utility.binToHex(binResult);
+		
+		for(int i = ROW-1; i >= 0; i--){
+			for(int j = 0; j < COLUMN; j++){
+				binResult = binResult + grid[i][j].getGridStatus()[1];
+			}
+		}
+		binResult = "11" + binResult + "11";
+		hexResult2 = utility.binToHex(binResult);
+
+		
+		output = TABLET +"@" + hexResult + "@" + hexResult2;
 		return output;
 	}
 	

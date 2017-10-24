@@ -1945,9 +1945,32 @@ public class Robot implements RobotArenaProtocol{
 				break;
 			}
 		}
-
+		
+	
 		if(!obstacleDetected){
-			for (int i1 = 2; i1 < LONGRANGE_SENSOR_MAXIMUM_DISTANCE; i1++) {
+			// overwrite second grid from long range if slip thru
+			if (obstcaleDistance2 == 1){
+				switch (this.robotHead) {
+				case NORTH:
+					grid[curPosition[0]-1][curPosition[1]+3].setGridStatus(VISITED, OBSTACLE);
+					obstacleDetected = true;
+					break;
+				case SOUTH:
+					grid[curPosition[0]+1][curPosition[1]-3].setGridStatus(VISITED, OBSTACLE);
+					obstacleDetected = true;
+					break;
+				case EAST:
+					grid[curPosition[0]+3][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
+					obstacleDetected = true;
+					break;
+				case WEST:
+					grid[curPosition[0]-3][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
+					obstacleDetected = true;
+					break;
+				}
+			}
+			
+			for (int i1 = 2; i1 < LONGRANGE_SENSOR_MAXIMUM_DISTANCE; i1++) {	
 				if (obstacleDetected){
 					break;
 				}

@@ -51,10 +51,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				
 							
 		// loop while robot is not yet at GOAL ZONE
-		do{
-			int row = robot.getCurrentPosition()[0];
-			int column = robot.getCurrentPosition()[1];
-		
+		do{		
 			if(goStraight){
 				// move forward
 				goStraight = false;
@@ -62,7 +59,6 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
 				robot.goStraight();
 				moveCount++;
-
 				
 			}else if(!this.leftIsBlocked()){
 				
@@ -89,7 +85,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 			
 			// Output Moves position
 			Arena.appendMessage("Current Pos(R/C/Deg): " + robot.getCurrentPosition()[0] + " ; " + robot.getCurrentPosition()[1]+ " ; " + robot.getRobotHead()+
-					"; Counter: " + moveCount+1);
+					"; Counter: " + (moveCount+1));
 		
 			if(robot.getCurrentPosition()[0] == 1 && robot.getCurrentPosition()[1] == 13){
 				reachedGoal=true;
@@ -107,12 +103,12 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		//cleanupExplorationThread();
 					
 		// make robot to face north AKA TURNTONORTH
+		calibrateRobot();
 	 	switch(robot.getRobotHead()){
 		case NORTH:
 			break;
 		case SOUTH:
-			rpiMgr.sendInstruction2(AUDUINO + TURNLEFT);
-			rpiMgr.sendInstruction2(AUDUINO + TURNLEFT);
+			rpiMgr.sendInstruction2(AUDUINO + TURNBACK);
 			robot.setRobotHead(SOUTH);
 			break;
 		case EAST:
@@ -157,21 +153,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 			}
 		}
 	}
-
-	private String generateMsgToTablet() {
-		String output = "";
-		output = "explore:\"" + arenaInforToStringVisited() + "\"!";
-		output += "grid:\"" + arenaInforToStringObstacle()+ "\"!";
-		output += robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()) + "!";
-		return output;
-	}
-
 	
-	private String generateMsgToTablet2() {
-		String output = "";
-		output = TABLET +"@" + arenaInforToStringVisited() + "@" + arenaInforToStringObstacle();
-		return output;
-	}
 	private void cleanupExplorationThread() {
 		boolean explorable = true;
 		do{
@@ -268,6 +250,12 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		
 
 		for(int j = 0; j < robotPath.length(); j++){
+			if(moveCount >3){
+				boolean result = calibrateRobot();
+				if(result){
+					moveCount = 0;
+				}
+			}
 			switch (robotPath.charAt(j)){
 			case 'W':
 				int counter = 1;
@@ -734,6 +722,20 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	/*
 	 * STRING CONVERTER 
 	 */	
+	private String generateMsgToTablet() {
+		String output = "";
+		output = "explore:\"" + arenaInforToStringVisited() + "\"!";
+		output += "grid:\"" + arenaInforToStringObstacle()+ "\"!";
+		output += robotLocationToString(robot.getCurrentPosition()[0], robot.getCurrentPosition()[1], robot.getRobotHead()) + "!";
+		return output;
+	}
+
+	private String generateMsgToTablet2() {
+		String output = "";
+		output = TABLET +"@" + arenaInforToStringVisited() + "@" + arenaInforToStringObstacle();
+		return output;
+	}
+	
 	private String robotLocationToString(int row, int column, int robotHead) {
 		String output = "rPos:" + row + "," + column + "," + robotHead;
 		return output;
@@ -744,11 +746,12 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		String hexResult = "";
 		String binResult = "";
 		
-		for(int i = 19; i >= 0; i--){
+		for(int i = ROW-1; i >= 0; i--){
 			for(int j = 0; j < COLUMN; j++){
 				binResult = binResult + grid[i][j].getGridStatus()[1];
 			}
 		}
+		//binResult = "11" + binResult + "11";
 		hexResult = utility.binToHex(binResult);
 		return hexResult;
 	}
@@ -758,12 +761,13 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		String hexResult = "";
 		String binResult = "";
 		
-		for(int i = 19; i >= 0; i--){
+		for(int i = ROW-1; i >= 0; i--){
 			for(int j =0; j < COLUMN; j++){
 				binResult = binResult + grid[i][j].getGridStatus()[0];
 			}
 		}
-
+		
+		//binResult = "11" + binResult + "11";
 		hexResult = utility.binToHex(binResult);
 
 		return hexResult;

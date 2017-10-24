@@ -49,7 +49,7 @@ public class RpiManager implements RobotArenaProtocol {
 			SocketClientManager.writeToSocket(instruction);
 			while(true){
 				synchronized(socketThread){
-					Arena.appendMessage("Awaiting Movement ACK");
+					Arena.appendMessage("Awaiting Movement ACK...");
 					socketThread.wait();
 					String input = SocketClientManager.receivedMsg;
 				

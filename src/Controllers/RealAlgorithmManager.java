@@ -49,21 +49,28 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		int moveCount = 0;
 		Arena.appendMessage("Starting Real Exploration..");
 				
-							
+		String sentIns = "";		
 		// loop while robot is not yet at GOAL ZONE
 		do{		
-			if(goStraight){
+			if(goStraight && !(this.frontIsBlocked())){
+			//if(goStraight){
+
 				// move forward
 				goStraight = false;
-
 				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
+				sentIns = "W1";
 				robot.goStraight();
 				moveCount++;
+			}else if(goStraight && this.frontIsBlocked()){
+				rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
+				sentIns = "D";
+				robot.turnRight();
+				goStraight = true;
 				
 			}else if(!this.leftIsBlocked()){
-				
 				// TURN LEFT
 				rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
+				sentIns = "A";
 				robot.turnLeft();
 				goStraight = true;
 
@@ -71,21 +78,41 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				robot.goStraight();
 				goStraight = false;
 				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
+				sentIns = "W1234";
 				moveCount++;
 			}  else if(!this.rightIsBlocked()){
 				rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
+				sentIns = "D";
 				robot.turnRight();
 				goStraight = true;
 			}
-			else {
-				rpiMgr.sendInstruction2(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
-				robot.turnBack();
-				goStraight = false;
+			else {/*
+				if(isLeftSideAtWall()){
+					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
+					sentIns = "D";
+					robot.turnRight();
+					arena.updateRobotPosition();
+					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
+					sentIns = "D";
+					robot.turnRight();
+					goStraight = true;
+				}
+				else{*/
+					rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
+					sentIns = "A";
+					robot.turnLeft();
+					arena.updateRobotPosition();
+					rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
+					sentIns = "A";
+					robot.turnLeft();
+					goStraight = true;
+				//}
+
 			}
 			
 			// Output Moves position
 			Arena.appendMessage("Current Pos(R/C/Deg): " + robot.getCurrentPosition()[0] + " ; " + robot.getCurrentPosition()[1]+ " ; " + robot.getRobotHead()+
-					"; Counter: " + (moveCount+1));
+					"; Counter: " + (moveCount+1)  + " ; Sent: " +  sentIns);
 		
 			if(robot.getCurrentPosition()[0] == 1 && robot.getCurrentPosition()[1] == 13){
 				reachedGoal=true;
@@ -123,19 +150,20 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		robot.turnToNorth();
 
 		arena.updateRobotPosition();
-		rpiMgr.sendInstruction(TABLET + generateMsgToTablet());
 
 		utility.playExploreSuccessSound();
 		Arena.appendMessage("Exploration Completed!");
 		Arena.isExplorationDone = true;
 		
 		arena.allowFastestPath(true);
-		rpiMgr.sendInstruction(generateMsgToTablet2());
+		
 		// save file
 		ArrayList<String> result = new ArrayList<String>();
 		result = utility.exportMap(grid);
-		utility.saveArenaToFile(FILENAME2,result);
+		utility.saveArenaToFile(FILENAME2, result);
 		
+		rpiMgr.sendInstruction(TABLET + generateMsgToTablet2(result));
+
 		fpgo(grid);
 		while(true){
 			String input = rpiMgr.getInstructionFromAndroid();
@@ -183,7 +211,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				if(robot.getCurrentPosition()[0] != 18  || robot.getCurrentPosition()[1] != 1)
 				{
 					points.add(new int[]{18,1});
-					cleanupExplorationToStart(grid, points);
+					cleanupExploration(grid, points);
 				}
 				explorable = false;
 			}
@@ -287,111 +315,6 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		}
 		return robotPath;
 	}
-
-	private String cleanupExplorationToStart(Grid[][] grid, ArrayList<int[]> points) {
-		// TODO Auto-generated method stub
-
-		String robotPath = "";
-		int[] path = null;
-		int[] currentPos = robot.getCurrentPosition();
-		int[] tempPos, tempnextPos;
-		int[][] pathCost;
-		int cost=99999;
-		int curDeg = 0;
-
-		for(int i=0; i<points.size(); i++)
-		{
-			FastestPath fp = new FastestPath(grid, currentPos, points.get(i));
-			pathCost = fp.executeCost();
-			
-			if(pathCost[1][0] < cost){
-				path = pathCost[0];
-				cost = pathCost[1][0];
-			}
-		}
-		
-		tempPos = Grid.convert1DPositionTo2DPositon(path[0]);
-		tempnextPos = Grid.convert1DPositionTo2DPositon(path[1]);
-		
-		if(tempnextPos[0] == tempPos[0])
-		{
-			if(tempnextPos[1] > tempPos[1])
-				curDeg = Robot.EAST;
-			else if(tempnextPos[1] < tempPos[1])
-				curDeg = Robot.WEST;
-		}
-		else if(tempnextPos[1] == tempPos[1])
-		{
-			if(tempnextPos[0] > tempPos[0])
-				curDeg = Robot.NORTH;
-			if(tempnextPos[0] > tempPos[0])
-				curDeg = Robot.SOUTH;
-		}
-		
-		robotPath += robot.turnToReqDirection(robot.getRobotHead(), curDeg);
-		
-		for(int j = 0; j<path.length-1;j++){
-			int[] curPos = Grid.convert1DPositionTo2DPositon(path[j]);
-			int[] nxtPos = Grid.convert1DPositionTo2DPositon(path[j+1]);
-	
-			String curTurn = robot.turnString(curPos, nxtPos, curDeg);
-			if(curTurn.equals(TURNRIGHT))
-				curDeg = robot.getDirAfterRightTurn(curDeg);
-			
-			else if(curTurn.equals(TURNLEFT))
-				curDeg = robot.getDirAfterLeftTurn(curDeg);
-			
-			robotPath += curTurn;
-			robotPath += FORWARD;
-		}
-		Arena.appendMessage("Cur path: "+ robotPath);
-		
-
-		for(int j = 0; j < robotPath.length(); j++){
-			switch (robotPath.charAt(j)){
-			case 'W':
-				int counter = 1;
-				
-				for(int a = j+1; a <robotPath.length();a++){
-					if(robotPath.charAt(a) == 'W'){
-						robot.goStraight();
-						counter++;
-						j++;
-						moveCount++;
-						if(counter>=9)
-							break;
-					}
-					else
-						break;
-				}
-				String newFoward = FORWARD + counter;
-				rpiMgr.sendInstruction2(AUDUINO + newFoward  + "#" +  TABLET  + generateMsgToTablet());
-				robot.goStraight();
-
-				moveCount++;
-				break;
-				
-			case 'A':
-				rpiMgr.sendInstruction2(AUDUINO+TURNLEFT  + "#" +  TABLET  + generateMsgToTablet());
-				robot.turnLeft();
-				moveCount++;
-				break;
-			case 'D':
-				rpiMgr.sendInstruction2(AUDUINO+TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
-				robot.turnRight();
-				moveCount++;
-				break;			
-			case 'B':
-				rpiMgr.sendInstruction2(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
-				robot.turnBack();
-				moveCount++;
-				break;
-			}
-			Arena.appendMessage("Current Pos(R/C/Deg/Counter): " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1] + "; " + robot.getRobotHead() + " ; "  + moveCount);
-			arena.updateRobotPosition();
-		}
-		return robotPath;
-	}
 	
 	public void fpgo(final Grid[][] grid){
 		 Thread thread = new Thread(new Runnable() {  
@@ -463,7 +386,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 						robot.goStraight();
 						counter++;
 						j++;
-						if(counter>=9)
+						if(counter>=7)
 							break;
 					}
 					else
@@ -718,7 +641,51 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		return false;	
 	}
 	
-	
+
+	public boolean isLeftSideAtWall(){
+		int row, col;
+		int deg;
+		row = robot.getCurrentPosition()[0];
+		col = robot.getCurrentPosition()[1];
+		
+		if (col == 1 && (row != 1 || row != 18)){
+			deg = robot.getRobotHead();
+			switch(deg){
+			case NORTH:
+				return true;
+			case SOUTH:
+				return false;
+			}
+		}else if (col == 13 && (row != 1 || row != 18)){
+			deg = robot.getRobotHead();
+			switch(deg){
+			case NORTH:
+				return false;
+			case SOUTH:
+				return true;
+			}
+		}else if (row == 1 && (col != 1 || col != 13)){
+			deg = robot.getRobotHead();
+			switch(deg){
+			case EAST:
+				return true;
+			case WEST:
+				return false;
+			}
+		}else if (row == 1 && (col != 1 || col != 13)){
+			deg = robot.getRobotHead();
+			switch(deg){
+			case EAST:
+				return false;
+			case WEST:
+				return true;
+			}
+		}
+
+
+		return true;
+		
+	}
 	/*
 	 * STRING CONVERTER 
 	 */	
@@ -730,31 +697,8 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		return output;
 	}
 
-	private String generateMsgToTablet2() {
-		String output = "";
-		
-		String hexResult = "";
-		String hexResult2 = "";
-		String binResult = "";
-		
-		for(int i = ROW-1; i >= 0; i--){
-			for(int j = 0; j < COLUMN; j++){
-				binResult = binResult + grid[i][j].getGridStatus()[0];
-			}
-		}
-		binResult = "11" + binResult + "11";
-		hexResult = utility.binToHex(binResult);
-		
-		for(int i = ROW-1; i >= 0; i--){
-			for(int j = 0; j < COLUMN; j++){
-				binResult = binResult + grid[i][j].getGridStatus()[1];
-			}
-		}
-		binResult = "11" + binResult + "11";
-		hexResult2 = utility.binToHex(binResult);
-
-		
-		output = TABLET +"@" + hexResult + "@" + hexResult2;
+	private String generateMsgToTablet2(ArrayList<String> result) {		
+		String output = TABLET +"@" + result.get(0) + "@" + result.get(1);
 		return output;
 	}
 	

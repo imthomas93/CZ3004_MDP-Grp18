@@ -24,6 +24,8 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 	private boolean timesUp = false;
 	private boolean enableCoverageTerminal = false;
 	private boolean enableTimerTerminal = false;
+	private int counter = 0;
+	private boolean trap = false;
 	
 	public SimAlgorithmManager(Robot robot, Arena arena, int[] wayPoint)
 	{
@@ -63,11 +65,13 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				
 				int x = robot.getCurrentPosition()[0];
 				int y = robot.getCurrentPosition()[1];
-			
-				
+
 				if(goStraight  && !(this.frontIsBlocked())){
 					robot.goStraight();
 					goStraight = false;
+				}else if(goStraight && this.frontIsBlocked()){
+					robot.turnRight();
+					goStraight = true;
 				} else if(!this.leftIsBlocked()){
 					robot.turnLeft();
 					goStraight = true;
@@ -80,7 +84,7 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				}
 				else {
 					robot.turnBack();
-					goStraight = false;
+					goStraight = true;
 				}
 				
 				if(robot.getCurrentPosition()[0]==1 && robot.getCurrentPosition()[1]==13){
@@ -112,8 +116,8 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 						arena.stopTimer();
 					}
 				}
-			
-				Arena.appendMessage("Current Pos: " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1]);
+				counter++;
+				Arena.appendMessage("Current Pos: " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1] + "\tCount: " + counter);
 			/*	
 			}while((!(robot.getCurrentPosition()[0] == 18 && robot.getCurrentPosition()[1] == 1)
 					|| reachedGoal!=true) && timeToGoBack==false && timesUp == false);
@@ -499,7 +503,8 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				default:
 		
 			}
-			Arena.appendMessage("Current Pos: " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1]);
+			counter++;
+			Arena.appendMessage("Current Pos: " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1] + "\tCount: " + counter);
 			
 			try {
 				Thread.sleep(1000/speed);

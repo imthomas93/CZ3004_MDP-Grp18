@@ -442,7 +442,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 			sensorReading = sensorReading.trim();
 			String[] sensorData = sensorReading.split(":");
 			
-			Arena.appendMessage("Sensor Readings: " + sensorReading);
+			Arena.appendMessage("InputReadings: " + sensorReading);
 			for(int i = 0; i < 6;i++){
 				sensorResult[i] = Integer.parseInt(sensorData[i]);
 			}
@@ -584,10 +584,8 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 
 		// create algo object
 		// get intial sensor data
-		RealAlgorithmManager.sensorData = rpiMgr.getSensorReading();
+		rpiMgr.getSensorReading();
 		realAlgoMgr = new RealAlgorithmManager(robot, arena, wayPoint, rpiMgr);
-		updateRobotPosition();
-	
 		updateRobotPosition();
 	
 		// pre-run calibration
@@ -640,8 +638,8 @@ public class Arena extends JFrame implements RobotArenaProtocol{
  			//TODO, switch to block design arena
  			if(!isRealRunNow){				
  				isRealRunNow  = true;
- 				btnSimExp.setEnabled(true);
- 				btnSimFP.setEnabled(true);
+ 				btnSimExp.setEnabled(false);
+ 				btnSimFP.setEnabled(false);
  				appendMessage("Mode: Real Run Mode");
  
  				resetArena();

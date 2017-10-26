@@ -30,23 +30,24 @@ public interface RobotArenaProtocol{
 	
 	// SENSOR DETAIlS
 	static final int SHROTRANGE_SENSOR_DISTANCE = 2;
-	static final int LONGRANGE_SENSOR_MAXIMUM_DISTANCE = 4;
+	static final int LONGRANGE_SENSOR_MAXIMUM_DISTANCE = 5;
 	
 	// ARENA UI COLOR CODE
 	static final Color STARTZONECOLOR = Color.PINK;
 	static final Color GOALZONECOLOR = Color.ORANGE;
 	static final Color ROBOT_COLOR = Color.BLUE;
 	static final Color ROBOTDIRECTION_COLOR = Color.YELLOW;
-	static final Color UNVISITED_COLOR = Color.BLACK;
+	static final Color UNVISITED_COLOR = Color.GRAY;
 	static final Color EMPTY_COLOR = Color.WHITE;
 	static final Color WAYPOINT_COLOR = Color.CYAN;
 	static final Color OBSTACLE_COLOR = Color.RED;
-	static final Color CELLBORDER_COLOR = Color.GRAY;
+	static final Color CELLBORDER_COLOR = Color.BLACK;
 	
 	// Rpi Comm Protocol
 	 static final String FORWARD = "W";
 	 static final String FORWARD1 = "W1";
 	 static final String TURNLEFT = "A";
+	 static final String GOREVERSE = "X";
 	 static final String TURNRIGHT = "D";
 	 static final String TURNBACK = "B";
 	 static final String SCANARENA = "S";

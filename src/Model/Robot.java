@@ -1,5 +1,7 @@
 package Model;
 
+import java.util.concurrent.ExecutionException;
+
 import Controllers.RealAlgorithmManager;
 
 public class Robot implements RobotArenaProtocol{
@@ -112,7 +114,7 @@ public class Robot implements RobotArenaProtocol{
 	{
 		switch (robotHead) {
 		case NORTH:
-			this.robotHead = 180;
+			this.robotHead = SOUTH;
 			break;
 		case SOUTH:
 			this.robotHead = NORTH;
@@ -125,6 +127,7 @@ public class Robot implements RobotArenaProtocol{
 			break;
 		}
 	}
+	
 
 	private static boolean notInsideArena(int row, int column) {
 		if(row<= 0 || row>= ROW-1 || column <= 0 || column >= COLUMN-1)
@@ -1030,12 +1033,8 @@ public class Robot implements RobotArenaProtocol{
 			case NORTH:
 				// check if the position is inside the arena
 				if (positionInsideArena(curPosition[0]-2-i, curPosition[1]-1)){
-					if((grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
-						
-						if (grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
+				//	if((grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[1] == OBSTACLE)
+					//		|| grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
 						
 						if(i == obstacleDistance){
 							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
@@ -1045,17 +1044,13 @@ public class Robot implements RobotArenaProtocol{
 							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
 					}
-				}
+				//}
 				break;
 
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]+1)){
-					if((grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[1] == OBSTACLE && grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == VISITED) 
-							|| grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
-						
-						if (grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
+					//if((grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[1] == OBSTACLE && grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == VISITED) 
+						//	|| grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
 						
 						if(i == obstacleDistance){
 							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
@@ -1065,18 +1060,15 @@ public class Robot implements RobotArenaProtocol{
 							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
 					}
-				}
+			//	}
 				break;
 
 			case EAST:
 				if(positionInsideArena(curPosition[0]-1,curPosition[1]+2+i)){
-					if((grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+				//	if((grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
+					//		|| grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
 
-						if (grid[curPosition[0]-1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
-						
+		
 						if(i == obstacleDistance){
 							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
 							obstacleDetected = true;
@@ -1084,18 +1076,15 @@ public class Robot implements RobotArenaProtocol{
 						else{
 							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-					}
-					
-					break;
+					//}
 				}
+				break;
+				
 			case WEST:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-i)){
-					if((grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+					//if((grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
+						//	|| grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
 						
-						if (grid[curPosition[0]+1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
 						if(i == obstacleDistance){
 							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
 							obstacleDetected = true;
@@ -1105,9 +1094,10 @@ public class Robot implements RobotArenaProtocol{
 						}
 					}
 
-				}
+				//}
 				break;
-			}	
+			
+			}
 			if(obstacleDetected){
 				break;
 			}
@@ -1221,13 +1211,10 @@ public class Robot implements RobotArenaProtocol{
 			switch (this.robotHead) {
 			case NORTH:
 				if(positionInsideArena(curPosition[0]-2-i,curPosition[1])){
-					if((grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
+					//if((grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[1] == OBSTACLE)
+						//	|| grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
 					
-						if (grid[curPosition[0]-2-i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
-						
+	
 						if(i == obstacleDistance){
 							grid[curPosition[0]-2-i][curPosition[1]].setGridStatus(VISITED, OBSTACLE);
 							obstacleDetected = true;
@@ -1237,17 +1224,13 @@ public class Robot implements RobotArenaProtocol{
 						}
 					}
 
-				}	
+				//}	
 				break;
 
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1])){
-					if((grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == VISITED && grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
-						
-						if (grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
+					//if((grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == VISITED && grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[1] == OBSTACLE)
+						//	|| grid[curPosition[0]+2+i][curPosition[1]].getGridStatus()[0] == NOT_VISITED ){
 						
 						if(i == obstacleDistance)
 						{
@@ -1260,18 +1243,15 @@ public class Robot implements RobotArenaProtocol{
 						}
 					}
 						
-				}
+				//}
 				break;
 
 			case EAST:
 				if(positionInsideArena(curPosition[0],curPosition[1]+2+i)){
-					if((grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
+					//if((grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
+						//	|| grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
 					
-						if (grid[curPosition[0]][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
-						
+					
 						if(i == obstacleDistance){
 							grid[curPosition[0]][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
 							obstacleDetected = true;
@@ -1281,17 +1261,13 @@ public class Robot implements RobotArenaProtocol{
 						}
 					}
 						
-					}
+				//}
 				break;
 
 			case WEST:
 				if(positionInsideArena(curPosition[0],curPosition[1]-2-i)){
-					if((grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
-						
-						if (grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
+					//if((grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
+						//	|| grid[curPosition[0]][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
 						
 						if(i == obstacleDistance){
 							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
@@ -1301,9 +1277,7 @@ public class Robot implements RobotArenaProtocol{
 							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
 					}
-						
-
-				}
+				//}
 				break;
 		}
 			if(obstacleDetected)
@@ -1429,12 +1403,8 @@ public class Robot implements RobotArenaProtocol{
 			case NORTH:
 				if(positionInsideArena(curPosition[0]-2-i,curPosition[1]+1)){
 					
-					if((grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
-						
-						if (grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
+					//if((grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == VISITED && grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[1] == OBSTACLE)
+						//|| grid[curPosition[0]-2-i][curPosition[1]+1].getGridStatus()[0] == NOT_VISITED ){
 						
 						if(i == obstacleDistance){
 							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
@@ -1444,18 +1414,13 @@ public class Robot implements RobotArenaProtocol{
 							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
 					}
-
-				}
+				//}
 				break;
 
 			case SOUTH:
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
-					if((grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == VISITED && grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
-					
-						if (grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
+					//if((grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == VISITED && grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[1] == OBSTACLE)
+						//|| grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
 						
 						if(i == obstacleDistance){
 							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
@@ -1466,18 +1431,13 @@ public class Robot implements RobotArenaProtocol{
 						}
 					}
 	
-				}
+				//}
 				break;
 
 			case EAST:
 				if(positionInsideArena(curPosition[0]+1,curPosition[1]+2+i)){
-					if((grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
-						
-						if (grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
-						
+					//if((grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == VISITED && grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[1] == OBSTACLE)
+						//|| grid[curPosition[0]+1][curPosition[1]+2+i].getGridStatus()[0] == NOT_VISITED ){
 						if(i == obstacleDistance){
 							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, OBSTACLE);
 							obstacleDetected = true;
@@ -1487,18 +1447,14 @@ public class Robot implements RobotArenaProtocol{
 						}	
 					}
 
-				}
+			//}
 				break;
 				
 			case WEST:
 				if(positionInsideArena(curPosition[0]-1,curPosition[1]-2-i)){
-					if((grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
-							|| grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
+					//if((grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == VISITED && grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[1] == OBSTACLE)
+						//	|| grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
 					
-						if (grid[curPosition[0]-1][curPosition[1]-2-i].getGridStatus()[0] == NOT_VISITED ){
-							RealAlgorithmManager.visitedCounter++;
-						}
-						
 						if(i == obstacleDistance){
 							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, OBSTACLE);
 							obstacleDetected = true;
@@ -1507,7 +1463,7 @@ public class Robot implements RobotArenaProtocol{
 							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}	
 					}
-				}
+				//}
 				break;
 			}
 			if(obstacleDetected){
@@ -1948,28 +1904,34 @@ public class Robot implements RobotArenaProtocol{
 		
 	
 		if(!obstacleDetected){
+			
 			// overwrite second grid from long range if slip thru
 			if (obstcaleDistance2 == 1){
-				switch (this.robotHead) {
+				switch(this.robotHead){
 				case NORTH:
-					grid[curPosition[0]-1][curPosition[1]+3].setGridStatus(VISITED, OBSTACLE);
-					obstacleDetected = true;
+					if(positionInsideArena(curPosition[0]-1,curPosition[1]+2+1)){
+						grid[curPosition[0]-1][curPosition[1]+2+1].setGridStatus(VISITED, OBSTACLE);
+					}
 					break;
 				case SOUTH:
-					grid[curPosition[0]+1][curPosition[1]-3].setGridStatus(VISITED, OBSTACLE);
-					obstacleDetected = true;
+					if(positionInsideArena(curPosition[0]+1,curPosition[1]-2-1)){
+						grid[curPosition[0]+1][curPosition[1]-2-1].setGridStatus(VISITED, OBSTACLE);
+					}
 					break;
 				case EAST:
-					grid[curPosition[0]+3][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
-					obstacleDetected = true;
+					if(positionInsideArena(curPosition[0]+2+1,curPosition[1]+1)){
+						grid[curPosition[0]+2+1][curPosition[1]+1].setGridStatus(VISITED, OBSTACLE);
+					}
 					break;
 				case WEST:
-					grid[curPosition[0]-3][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
-					obstacleDetected = true;
+					if(positionInsideArena(curPosition[0]-2-1,curPosition[1]-1)){
+						grid[curPosition[0]-2-1][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
+					}
 					break;
 				}
+				obstacleDetected = true;
 			}
-			
+	
 			for (int i1 = 2; i1 < LONGRANGE_SENSOR_MAXIMUM_DISTANCE; i1++) {	
 				if (obstacleDetected){
 					break;

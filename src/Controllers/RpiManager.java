@@ -55,9 +55,11 @@ public class RpiManager implements RobotArenaProtocol {
 				
 					// tokenise message
 					String[] inputData = input.split("!");
+					
 					if (inputData[0].equals("ACK")){
 						RealAlgorithmManager.sensorData = inputData[1];
-						Arena.appendMessage("ACK!");
+						Arena.appendMessage("ACK!\n");
+						Arena.appendMessage(inputData[2]);
 						break;
 					}
 				}
@@ -168,7 +170,7 @@ public class RpiManager implements RobotArenaProtocol {
 		return andoridInput;
 	}
 
-	public String getSensorReading() {
+	public void getSensorReading() {
 		// Return intial sensor reading then robot is ready
 		String sensorReading = "";		
 		try {
@@ -181,12 +183,14 @@ public class RpiManager implements RobotArenaProtocol {
 			synchronized(socketThread){
 				socketThread.wait();
 				sensorReading = SocketClientManager.receivedMsg;
+				
+				// tokenise message
+				String[] inputData = sensorReading.split("!");	
+				RealAlgorithmManager.sensorData = inputData[1];
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		sensorReading = sensorReading.trim();
-		return sensorReading;
 	}
 
 

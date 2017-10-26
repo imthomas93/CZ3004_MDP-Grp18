@@ -109,7 +109,6 @@ public class SocketClientManager extends Thread
 			// this method will block no more than timeout ms.
 			int timeoutInMs = 10*1000;   // 10 seconds
 			socket.connect(socketAddress, timeoutInMs);
-			
 			System.out.println("Successfully Connected to Rpi's Socket");
 			openedSocket = socket;
 		} 

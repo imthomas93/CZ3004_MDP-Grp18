@@ -30,7 +30,7 @@ public interface RobotArenaProtocol{
 	
 	// SENSOR DETAIlS
 	static final int SHROTRANGE_SENSOR_DISTANCE = 2;
-	static final int LONGRANGE_SENSOR_MAXIMUM_DISTANCE = 5;
+	static final int LONGRANGE_SENSOR_MAXIMUM_DISTANCE = 4;
 	
 	// ARENA UI COLOR CODE
 	static final Color STARTZONECOLOR = Color.PINK;

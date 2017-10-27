@@ -386,7 +386,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 						robot.goStraight();
 						counter++;
 						j++;
-						if(counter>=7)
+						if(counter>=9)
 							break;
 					}
 					else

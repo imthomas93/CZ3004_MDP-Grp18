@@ -52,12 +52,13 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		String sentIns = "";		
 		// loop while robot is not yet at GOAL ZONE
 		do{		
+			int row = robot.getCurrentPosition()[0];
+			int col = robot.getCurrentPosition()[1];
+			
 			if(goStraight && !(this.frontIsBlocked())){
-			//if(goStraight){
-
 				// move forward
-				goStraight = false;
 				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
+				goStraight = false;
 				sentIns = "W1";
 				robot.goStraight();
 				moveCount++;
@@ -66,27 +67,62 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				sentIns = "D";
 				robot.turnRight();
 				goStraight = true;
-				
+				moveCount++;
 			}else if(!this.leftIsBlocked()){
 				// TURN LEFT
-				rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
-				sentIns = "A";
-				robot.turnLeft();
+				if(robot.canFrontCalibrate(row, col, grid, robot.getRobotHead())){	
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+				}
+				
+				if (robot.canRightCalibrate(row, col, grid, robot.getRobotHead())){
+					rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
+					robot.turnRight();
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+					rpiMgr.sendInstruction3(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
+					robot.turnBack();
+					sentIns = "B";
+					
+				}else{
+					rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
+					sentIns = "A";
+					robot.turnLeft();
+				}
 				goStraight = true;
+				moveCount++;
 
 			} else if(!this.frontIsBlocked()){
+								
+				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
 				robot.goStraight();
 				goStraight = false;
-				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
-				sentIns = "W1234";
+				sentIns = "W1";
 				moveCount++;
+				
 			}  else if(!this.rightIsBlocked()){
-				rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
-				sentIns = "D";
-				robot.turnRight();
+				if(robot.canFrontCalibrate(row, col, grid, robot.getRobotHead())){	
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+				}
+				
+				if (robot.canLeftCalibrate(row, col, grid, robot.getRobotHead())){
+					rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
+					robot.turnLeft();
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+					rpiMgr.sendInstruction3(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
+					robot.turnBack();
+				}
+				else{
+					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
+					sentIns = "D";
+					robot.turnRight();
+				}
 				goStraight = true;
+				moveCount++;
 			}
-			else {/*
+			else {
+				if(robot.canFrontCalibrate(row, col, grid, robot.getRobotHead())){	
+					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+				}
+				
 				if(isLeftSideAtWall()){
 					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
 					sentIns = "D";
@@ -96,8 +132,9 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 					sentIns = "D";
 					robot.turnRight();
 					goStraight = true;
+					moveCount++;
 				}
-				else{*/
+				else{
 					rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
 					sentIns = "A";
 					robot.turnLeft();
@@ -106,8 +143,17 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 					sentIns = "A";
 					robot.turnLeft();
 					goStraight = true;
-				//}
+					moveCount++;
+				}
 
+			}
+			
+			// calibrate robot
+			if (moveCount >5){
+				boolean result = calibrateRobot();
+				if (result){
+					moveCount = 1;
+				}
 			}
 			
 			// Output Moves position

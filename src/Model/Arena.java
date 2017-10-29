@@ -63,9 +63,9 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 
     // UI Var
 	JPanel jpManual,jpSub1, jpSub2, jpSub3, jpArenaSub, jpLeft, jpRight, jpLeftMap, jpRightMap, jpToplabel;
-	JButton btnSwitchSimOrReal, btnRealExp, btnRealFP, btnSimExp, btnSimFP, btnReset, btnImport, btnSimExport,btnEnableCoverageTerminal, btnEnableTimeLimitTerminal;
+	JButton btnSwitchSimOrReal, btnRealExp, btnRealFP, btnSimExp, btnSimFP, btnReset, btnImport, btnSimExport,btnEnableCoverageTerminal, btnEnableTimeLimitTerminal, btnRowConverter;
 	JLabel jlbTimeLimit, jlArenaDesign, jlTimeCost, jlSpeed, jlbExpCoverage, jlbCoveragePercent, jlbTerminal, jlbTerminal2, jlConsoleArea, jlWayPoint,jlbTimeCoverage;
-	JTextField jtfExplorationCoverage;
+	JTextField jtfExplorationCoverage, jtfRowConverter;
 	static JTextArea textbox;
 	JComboBox jcbSpeed;
 	JScrollPane scrollV;
@@ -138,6 +138,9 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	   	jtfExplorationCoverage = new JTextField(5);
 	   	jtfExplorationCoverage.setText("100");
 	   	
+	   	jtfRowConverter = new JTextField(3);
+	   	jtfRowConverter.setText("Android row converter");
+
 	   	// GUI Console 
 		textbox	= new JTextArea();
 	   	textbox.setEditable(false);
@@ -163,7 +166,9 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	   	jpSub1.add(btnEnableCoverageTerminal);
 	   	jpSub1.add(jlSpeed);
 	   	jpSub1.add(jcbSpeed);
-		jpSub1.add(jlWayPoint);;
+		jpSub1.add(jlWayPoint);
+		jpSub1.add(jtfRowConverter);
+
 	   
 	   	jpSub3.add(scrollV);
 	 
@@ -207,6 +212,9 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	   	btnSimExport = new JButton("Export current real arena");
 	   	btnSimExport.addActionListener(new ExportMapHandler());
 	   	
+	   	btnRowConverter = new JButton("Row inverter");
+	   	btnRowConverter.addActionListener(new RowConverterHandler());
+
 		jpSub2.add(btnSwitchSimOrReal);
 	   	jpSub2.add(btnReset);
 	   	jpSub2.add(btnSimExp);
@@ -214,11 +222,13 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	   	jpSub2.add(btnReset);
 	   	jpSub2.add(btnImport);
 	   	jpSub2.add(btnSimExport);
+	   	jpSub2.add(btnRowConverter);
+
 	   	
-	    jpToplabel = new JPanel(new GridLayout(2,1));
+	    jpToplabel = new JPanel(new GridLayout(3,2));
 	    jpToplabel.add(jlbCoveragePercent);
 	    jpToplabel.add(jlbTimeCoverage);
-	
+	    	
 	   	jpLeft.add(jpLeftMap,BorderLayout.SOUTH);
 	   	jpLeft.add(jlArenaDesign,BorderLayout.NORTH);
 
@@ -469,7 +479,8 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 					//Grid has obstacle
 					else if(arenaDesign[i][j].getGridStatus()[1] == 1)
 						arenaDesign[i][j].setBackground(OBSTACLE_COLOR);
-					else if(i == wayPoint[0] && j == wayPoint[1])
+					
+					if(i == wayPoint[0] && j == wayPoint[1])
 						arenaDesign[i][j].setBackground(WAYPOINT_COLOR);
 				}		
 			}
@@ -799,6 +810,79 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 				jtfExplorationCoverage.setEditable(true);
 			}
 			simAlgoMgr.switchCoveredTerminal();
+		}
+	}
+	
+	class RowConverterHandler implements ActionListener{
+		
+		public void actionPerformed(ActionEvent event){
+			String getRow = jtfRowConverter.getText();
+
+			switch(getRow){
+			case "0":
+				jtfRowConverter.setText("19");
+				break;
+			case "1":
+				jtfRowConverter.setText("18");
+				break;
+			case "2":
+				jtfRowConverter.setText("17");
+				break;
+			case "3":
+				jtfRowConverter.setText("16");
+				break;
+			case "4":
+				jtfRowConverter.setText("15");
+				break;
+			case "5":
+				jtfRowConverter.setText("14");
+				break;
+			case "6":
+				jtfRowConverter.setText("13");
+				break;
+			case "7":
+				jtfRowConverter.setText("12");
+				break;
+			case "8":
+				jtfRowConverter.setText("11");
+				break;
+			case "9":
+				jtfRowConverter.setText("10");
+				break;
+			case "10":
+				jtfRowConverter.setText("9");
+				break;
+			case "11":
+				jtfRowConverter.setText("8");
+				break;
+			case "12":
+				jtfRowConverter.setText("7");
+				break;
+			case "13":
+				jtfRowConverter.setText("6");
+				break;
+			case "14":
+				jtfRowConverter.setText("5");
+				break;
+			case "15":
+				jtfRowConverter.setText("4");
+				break;
+			case "16":
+				jtfRowConverter.setText("3");
+				break;
+			case "17":
+				jtfRowConverter.setText("2");
+				break;
+			case "18":
+				jtfRowConverter.setText("1");
+				break;
+			case "19":
+				jtfRowConverter.setText("0");
+				break;
+			default:
+				jtfRowConverter.setText("ERROR");
+				break;
+			}
 		}
 	}
 	

@@ -128,7 +128,29 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		
 		// explore the rest using dijkstra algo
 		//cleanupExplorationThread();
-					
+				
+		utility.playExploreSuccessSound();
+		Arena.appendMessage("Exploration Completed!");
+		Arena.isExplorationDone = true;
+		
+		arena.allowFastestPath(true);
+		
+		arena.updateRobotPosition();
+		// save file
+		ArrayList<String> result = new ArrayList<String>();
+		result = utility.exportMap(grid);
+		utility.saveArenaToFile(FILENAME2, result);
+		
+		rpiMgr.sendInstruction(TABLET + generateMsgToTablet2(result));
+		
+		// delay before attemtping to calibrate
+		try {
+			TimeUnit.SECONDS.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// make robot to face north AKA TURNTONORTH
 		calibrateRobot();
 	 	switch(robot.getRobotHead()){
@@ -148,21 +170,8 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 			break;
 	 	}			
 		robot.turnToNorth();
-
 		arena.updateRobotPosition();
-
-		utility.playExploreSuccessSound();
-		Arena.appendMessage("Exploration Completed!");
-		Arena.isExplorationDone = true;
 		
-		arena.allowFastestPath(true);
-		
-		// save file
-		ArrayList<String> result = new ArrayList<String>();
-		result = utility.exportMap(grid);
-		utility.saveArenaToFile(FILENAME2, result);
-		
-		rpiMgr.sendInstruction(TABLET + generateMsgToTablet2(result));
 
 		fpgo(grid);
 		while(true){
@@ -542,29 +551,25 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		int direction = robot.getRobotHead();
 		if(direction == NORTH)
 		{
-			if(!robot.isMovable(x, y, grid, NORTH))
-			{
+			if(!robot.isMovable(x, y, grid, NORTH)){
 				return true;
 			}
 		}
 		else if(direction == SOUTH)
 		{
-			if(!robot.isMovable(x, y, grid, SOUTH))
-			{
+			if(!robot.isMovable(x, y, grid, SOUTH)){
 				return true;
 			}
 		}
 		else if(direction == EAST)
 		{
-			if(!robot.isMovable(x, y, grid, EAST))
-			{
+			if(!robot.isMovable(x, y, grid, EAST)){
 				return true;
 			}
 		}
 		else if(direction == WEST)
 		{
-			if(!robot.isMovable(x, y, grid, WEST))
-			{
+			if(!robot.isMovable(x, y, grid, WEST)){
 				return true;
 			}
 		}
@@ -641,7 +646,6 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		return false;	
 	}
 	
-
 	public boolean isLeftSideAtWall(){
 		int row, col;
 		int deg;
@@ -685,6 +689,15 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 
 		return true;
 		
+	}
+	
+	public int forwardisClear(){
+		int result = 1;
+		int row = robot.getCurrentPosition()[0];
+		int col = robot.getCurrentPosition()[1];
+		
+
+		return result;
 	}
 	/*
 	 * STRING CONVERTER 

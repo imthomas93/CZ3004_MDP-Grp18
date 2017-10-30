@@ -70,15 +70,18 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				moveCount++;
 			}else if(!this.leftIsBlocked()){
 				// TURN LEFT
+				
+				/* NO NEED THIS, ROBOT CAN DO FRONT CALIBRATE
 				if(robot.canFrontCalibrate(row, col, grid, robot.getRobotHead())){	
 					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
 				}
+				*/
 				
 				if (robot.canRightCalibrate(row, col, grid, robot.getRobotHead())){
 					rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
 					robot.turnRight();
-					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
-					rpiMgr.sendInstruction3(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
+					//rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+					rpiMgr.sendInstruction2(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
 					robot.turnBack();
 					sentIns = "B";
 					
@@ -99,15 +102,16 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				moveCount++;
 				
 			}  else if(!this.rightIsBlocked()){
+				/* NO NEED THIS, ROBOT CAN DO FRONT CALIBRATE
 				if(robot.canFrontCalibrate(row, col, grid, robot.getRobotHead())){	
 					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
-				}
+				}*/
 				
 				if (robot.canLeftCalibrate(row, col, grid, robot.getRobotHead())){
 					rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
 					robot.turnLeft();
-					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
-					rpiMgr.sendInstruction3(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
+					//rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+					rpiMgr.sendInstruction2(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
 					robot.turnBack();
 				}
 				else{
@@ -571,20 +575,22 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		int row = robot.getCurrentPosition()[0];
 		int column = robot.getCurrentPosition()[1];
 		
+		/* NO NEED THIS, ROBOT CAN DO FRONT CALIBRATE
 		if(robot.canFrontCalibrate(row, column, grid, robot.getRobotHead()))
 		{	
 			rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
 			return true;
-		}
-		else if(robot.canLeftCalibrate(row, column, grid, robot.getRobotHead())){
+		}*/
+		
+		if(robot.canLeftCalibrate(row, column, grid, robot.getRobotHead())){
 			rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
-			rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+			//rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
 			rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
 			return true;
 		}
 		else if (robot.canRightCalibrate(row, column, grid, robot.getRobotHead())){
 			rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);	
-			rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);	
+			//rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);	
 			rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
 			return true;
 		}

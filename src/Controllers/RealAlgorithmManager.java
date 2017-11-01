@@ -23,7 +23,8 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	public static String sensorData;
 	public static String fastestString = "";
 	private int moveCount = 0;
-	public static int visitedCounter = 0;
+	private String sentIns = "";		
+
 	
 	public RealAlgorithmManager(Robot robot, Arena arena, int[] wayPoint, RpiManager rpiMgr){
 		this.robot = robot;
@@ -49,7 +50,6 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		int moveCount = 0;
 		Arena.appendMessage("Starting Real Exploration..");
 				
-		String sentIns = "";		
 		// loop while robot is not yet at GOAL ZONE
 		do{		
 			int row = robot.getCurrentPosition()[0];
@@ -60,106 +60,60 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
 				goStraight = false;
 				sentIns = "W1";
-				robot.goStraight();
-				moveCount++;
+				robot.goStraight();				
+				moveCount++;				
 			}else if(goStraight && this.frontIsBlocked()){
+				rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
+				sentIns = "D";
+				robot.turnRight();
+				goStraight = true;				
+				moveCount++;		
+			}else if(!this.leftIsBlocked()){
+				// TURN LEFT
+				rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
+				sentIns = "A";
+				robot.turnLeft();
+				goStraight = true;
+				moveCount++;
+			} else if(!this.frontIsBlocked()){					
+				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
+				robot.goStraight();
+				sentIns = "W1";
+				moveCount++;				
+			}  else if(!this.rightIsBlocked()){
+				// TURN RIGHT
 				rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
 				sentIns = "D";
 				robot.turnRight();
 				goStraight = true;
 				moveCount++;
-			}else if(!this.leftIsBlocked()){
-				// TURN LEFT
-				
-				/* NO NEED THIS, ROBOT CAN DO FRONT CALIBRATE
-				if(robot.canFrontCalibrate(row, col, grid, robot.getRobotHead())){	
-					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
-				}
-				*/
-				
-				if (robot.canRightCalibrate(row, col, grid, robot.getRobotHead())){
-					rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
+			}
+			else {	
+				// UTURN
+				if(robot.canRightCalibrate(row, col, grid, robot.getRobotHead())){
+					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
 					robot.turnRight();
-					//rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
-					rpiMgr.sendInstruction2(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
-					robot.turnBack();
+					arena.updateRobotPosition();
+					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
 					sentIns = "B";
-					
+					robot.turnRight();
+					goStraight = false;
+
 				}else{
 					rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
-					sentIns = "A";
-					robot.turnLeft();
-				}
-				goStraight = true;
-				moveCount++;
-
-			} else if(!this.frontIsBlocked()){
-								
-				rpiMgr.sendInstruction2(AUDUINO + FORWARD1 + "#" +  TABLET  + generateMsgToTablet());
-				robot.goStraight();
-				goStraight = false;
-				sentIns = "W1";
-				moveCount++;
-				
-			}  else if(!this.rightIsBlocked()){
-				/* NO NEED THIS, ROBOT CAN DO FRONT CALIBRATE
-				if(robot.canFrontCalibrate(row, col, grid, robot.getRobotHead())){	
-					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
-				}*/
-				
-				if (robot.canLeftCalibrate(row, col, grid, robot.getRobotHead())){
-					rpiMgr.sendInstruction3(AUDUINO + TURNLEFT);
-					robot.turnLeft();
-					//rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
-					rpiMgr.sendInstruction2(AUDUINO + TURNBACK + "#" +  TABLET  + generateMsgToTablet());
-					robot.turnBack();
-				}
-				else{
-					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
-					sentIns = "D";
-					robot.turnRight();
-				}
-				goStraight = true;
-				moveCount++;
-			}
-			else {
-				if(robot.canFrontCalibrate(row, col, grid, robot.getRobotHead())){	
-					rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
-				}
-				
-				if(isLeftSideAtWall()){
-					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
-					sentIns = "D";
-					robot.turnRight();
-					arena.updateRobotPosition();
-					rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT + "#" +  TABLET  + generateMsgToTablet());
-					sentIns = "D";
-					robot.turnRight();
-					goStraight = true;
-					moveCount++;
-				}
-				else{
-					rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
-					sentIns = "A";
 					robot.turnLeft();
 					arena.updateRobotPosition();
 					rpiMgr.sendInstruction2(AUDUINO + TURNLEFT + "#" +  TABLET  + generateMsgToTablet());
-					sentIns = "A";
+					sentIns = "B";
 					robot.turnLeft();
-					goStraight = true;
-					moveCount++;
-				}
+					goStraight = false;
+				}	
+				moveCount++;
+			}
+			// Run turbo boost	
+			executeTurboBoost();
 
-			}
-			
-			// calibrate robot
-			if (moveCount >5){
-				boolean result = calibrateRobot();
-				if (result){
-					moveCount = 1;
-				}
-			}
-			
+
 			// Output Moves position
 			Arena.appendMessage("Current Pos(R/C/Deg): " + robot.getCurrentPosition()[0] + " ; " + robot.getCurrentPosition()[1]+ " ; " + robot.getRobotHead()+
 					"; Counter: " + (moveCount+1)  + " ; Sent: " +  sentIns);
@@ -169,23 +123,20 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 			}
 			// update sensor readings and robot positon on arena UI
 			arena.updateRobotPosition();
-			
-			if(visitedCounter == 300){
-				break;
-			}
 
 		}while(!(robot.getCurrentPosition()[0] == 18 && robot.getCurrentPosition()[1] == 1) || reachedGoal == false);
 		
 		// explore the rest using dijkstra algo
 		//cleanupExplorationThread();
-				
+		arena.updateRobotPosition();
+		rpiMgr.sendInstruction(TABLET + generateMsgToTablet());
+
 		utility.playExploreSuccessSound();
 		Arena.appendMessage("Exploration Completed!");
 		Arena.isExplorationDone = true;
 		
 		arena.allowFastestPath(true);
 		
-		arena.updateRobotPosition();
 		// save file
 		ArrayList<String> result = new ArrayList<String>();
 		result = utility.exportMap(grid);
@@ -195,7 +146,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		
 		// delay before attemtping to calibrate
 		try {
-			TimeUnit.SECONDS.sleep(10);
+			TimeUnit.SECONDS.sleep(3);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -207,8 +158,10 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		case NORTH:
 			break;
 		case SOUTH:
-			rpiMgr.sendInstruction2(AUDUINO + TURNBACK);
-			robot.setRobotHead(SOUTH);
+			rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT);
+			robot.setRobotHead(WEST);
+			rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT);
+			robot.setRobotHead(WEST);
 			break;
 		case EAST:
 			robot.setRobotHead(EAST);
@@ -222,7 +175,6 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		robot.turnToNorth();
 		arena.updateRobotPosition();
 		
-
 		fpgo(grid);
 		while(true){
 			String input = rpiMgr.getInstructionFromAndroid();
@@ -241,6 +193,22 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		}
 	}
 	
+	private void executeTurboBoost() {
+		int row = robot.getCurrentPosition()[0];
+		int col = robot.getCurrentPosition()[1];
+		
+		//int count = runHowManyGrid(row, col, sentIns);
+		int count = runHowManyGrid2(row, col, sentIns);
+
+		if (count != 0){
+			Arena.appendMessage("HELLOOOOOOOOO COUNTER IS " + count);
+			for(int i = 1; i <=count; i++){
+				robot.goStraight();
+			}
+			rpiMgr.sendInstruction2(AUDUINO + "W" + count + "#" +  TABLET  + generateMsgToTablet());
+		}
+	}
+
 	private void cleanupExplorationThread() {
 		boolean explorable = true;
 		do{
@@ -378,8 +346,9 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	public void fpgo(final Grid[][] grid){
 		 Thread thread = new Thread(new Runnable() {  
 		        public void run() {  
+		        	String line2;
 		        	// Disable arudino calibration
-		        	rpiMgr.sendInstruction(AUDUINO + FUCKINGFAST);
+		        	//rpiMgr.sendInstruction(AUDUINO + FUCKINGFAST);
 		        	fastestString = "";
 		        	// get shortest path to waypoint
 		        	Arena.appendMessage("Executing Fastest Path to waypoint!");
@@ -387,10 +356,28 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		        	fastestString = getFastestPath(grid);
 		        	Arena.appendMessage("Reached waypoint!");
 		        	
-		        	// get shortest path to GOAL
+		   		    // get shortest path to GOAL
 		        	Arena.appendMessage("Executing Fastest Path to GOAL!");
 		        	isAtWayPoint = true;
-		        	fastestString += getFastestPath(grid);
+		        	line2 = getFastestPath(grid);
+		        	
+		        	Arena.appendMessage("String 1: " + fastestString);
+		        	Arena.appendMessage("String 2: " + line2);
+
+		        	/*
+		        	if (line2.charAt(0) != 'W'){
+		        		fastestString += line2;
+		        	}
+		        	else{
+		        		int second = line2.charAt(1);
+		        		line2.substring(2, line2.length());
+		        		int first = fastestString.charAt(fastestString.length()-1);
+		        		
+		        		String patch = "W" + second + first;
+		        		fastestString.substring(0, fastestString.length()-2);
+		        		fastestString = fastestString + patch + line2;
+		        	}*/
+	        		fastestString += line2; 
 		        	Arena.appendMessage("Fastest Path road: " + fastestString);
 		        }
 		    }  );
@@ -445,7 +432,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 						robot.goStraight();
 						counter++;
 						j++;
-						if(counter>=9)
+						if(counter>=12)
 							break;
 					}
 					else
@@ -561,7 +548,6 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		else
 			return false;
 	}
-
 	
 	public void setWayPoint(int[] newWP){
 		this.wayPoint = newWP;
@@ -698,59 +684,773 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 		return false;	
 	}
 	
-	public boolean isLeftSideAtWall(){
-		int row, col;
-		int deg;
-		row = robot.getCurrentPosition()[0];
-		col = robot.getCurrentPosition()[1];
-		
-		if (col == 1 && (row != 1 || row != 18)){
-			deg = robot.getRobotHead();
-			switch(deg){
-			case NORTH:
-				return true;
-			case SOUTH:
-				return false;
-			}
-		}else if (col == 13 && (row != 1 || row != 18)){
-			deg = robot.getRobotHead();
-			switch(deg){
-			case NORTH:
-				return false;
-			case SOUTH:
-				return true;
-			}
-		}else if (row == 1 && (col != 1 || col != 13)){
-			deg = robot.getRobotHead();
-			switch(deg){
-			case EAST:
-				return true;
-			case WEST:
-				return false;
-			}
-		}else if (row == 1 && (col != 1 || col != 13)){
-			deg = robot.getRobotHead();
-			switch(deg){
-			case EAST:
-				return false;
-			case WEST:
-				return true;
-			}
-		}
-
-
-		return true;
-		
+	public boolean positionInsideArena(int row, int column){
+		if(row >= 0 && row <= ROW-1 && column >= 0 && column <= COLUMN-1)
+			return true;
+		else
+			return false;
 	}
 	
-	public int forwardisClear(){
-		int result = 1;
+	private int runHowManyGrid2(int row, int col, String dir) {
+		// TODO Auto-generated method stub
+		int result = 0;
+		int front = 0,left = 0,right = 0;
+		int deg = robot.getRobotHead();
+		boolean flag = false;
+		switch(deg){
+		case NORTH:
+			for(result = 0; result < 6; result++){
+				// check front first
+				for(int i = -1; i <=1; i++){
+					if(positionInsideArena((row-result), (col + i))){
+						if(grid[row - result][col + i].getGridStatus()[0] == VISITED &&
+								 grid[row - result][col + i].getGridStatus()[1] == OBSTACLE){
+							front=-1;
+							flag = true;
+							break;
+						}
+						if(grid[row - result][col + i].getGridStatus()[0] != VISITED){
+							front=-1;
+							flag = true;
+							break;
+						}
+					}
+					else{
+						front=-1;
+						flag = true;
+						break;
+					}
+				}
+				// check left	
+				for(int i = -2;  i >-4;i--){
+					if(positionInsideArena((row-1-result), (col + i))){
+						if(grid[row - result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row - result][col + i].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if (grid[row - 1 - result][col + i].getGridStatus()[0] == VISITED 
+								&& grid[row - result][col + i].getGridStatus()[1] != OBSTACLE){
+							left-=1;
+							flag = true;
+							break;
+						}
+						if (grid[row - result][col + i].getGridStatus()[0] != VISITED){
+							left-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				// check right
+				int k = LONGRANGE_SENSOR_MAXIMUM_DISTANCE;
+				for(int i = 2; i < k;i++){
+
+					if(positionInsideArena((row-1-result), (col + i))){
+						if(grid[row - result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row - result][col + i].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						
+						if (grid[row - result][col + i].getGridStatus()[0] == VISITED){
+							right-=1;
+							flag = true;
+							break;
+						}
+						if (grid[row - result][col + i].getGridStatus()[0] != VISITED){
+							right-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				if(flag){
+					flag = false;
+					break;
+				}
+				front++;
+				left++;
+				right++;
+			}
+			break;
+		
+		case SOUTH:
+			for(result = 0; result < 6; result++){
+				// check front first
+				for(int i = -1; i <=1; i++){
+					if(positionInsideArena((row+result), (col + i))){
+						if (grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row+result][col + i].getGridStatus()[1] == OBSTACLE){
+							front=-1;
+							flag = true;
+							break;
+						}
+						if (grid[row+result][col + i].getGridStatus()[0] != VISITED){
+							front=-1;
+							flag = true;
+							break;
+						}
+					}
+					else{
+						front=-1;
+						flag = true;
+						break;
+					}
+				}
+				// check left
+				for(int i = 2;  i < 4;i++){
+					if(positionInsideArena((row+result), (col + i))){
+						if(grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row+result][col + i].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if (grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row+result][col + i].getGridStatus()[1] != OBSTACLE){
+							left-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+result][col + i].getGridStatus()[0] != VISITED){
+							left-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				// check right
+				int k = 0 - LONGRANGE_SENSOR_MAXIMUM_DISTANCE;
+				for(int i = -2; i > (k) ;i--){
+					if(positionInsideArena((row+result), (col + i))){
+						if(grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row+result][col + i].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if (grid[row+result][col + i].getGridStatus()[0] != VISITED){
+							right-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+							grid[row + result][col + i].getGridStatus()[1] != OBSTACLE){
+							
+							right-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				if(flag){
+					flag = false;
+					break;
+				}
+				front++;
+				left++;
+				right++;
+			}
+
+			break;
+		case EAST:
+			for(result = 0; result < 6; result++){
+				// check front
+				for(int i = -1; i <=1; i++){
+					if(positionInsideArena((row+i), (col+ result))){
+						if (grid[row+i][col + result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col + result].getGridStatus()[1] == OBSTACLE){
+							front=-1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col+ result].getGridStatus()[0] != VISITED){
+							front=-1;
+							flag = true;
+							break;
+						}
+					}
+					else{
+						front=-1;
+						flag = true;
+						break;
+					}
+				}
+				// check left
+				for(int i = -2;  i > -4;i--){
+					if(positionInsideArena((row+i), (col + result))){
+						if(grid[row+i][col + result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col + result].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if(grid[row+i][col + result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col + result].getGridStatus()[1] != OBSTACLE){
+							left-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col + result].getGridStatus()[0] !=VISITED){
+							left-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				
+				// check right
+				int k = LONGRANGE_SENSOR_MAXIMUM_DISTANCE;
+				for(int i = 2; i < (k);i++){
+					if(positionInsideArena((row+i), (col + result))){
+						if(grid[row+i][col + result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col + result].getGridStatus()[1] == OBSTACLE){
+							right-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col + result].getGridStatus()[0] !=VISITED){
+							right = right -1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				if(flag){
+					flag = false;
+					break;
+				}	
+				left++;
+				right++;
+				front++;
+			}
+			break;
+		
+		case WEST:
+			for(result = 0; result < 6; result++){
+				// check front
+				for(int i = -1; i <= 1; i++){
+					if(positionInsideArena((row+i), (col - result))){
+						if (grid[row+i][col - result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col - result].getGridStatus()[1] == OBSTACLE){
+							front= -1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col - result].getGridStatus()[0] != VISITED){
+							front=-1;
+							flag = true;
+							break;
+						}
+					}
+					else{
+						front=-1;
+						flag = true;
+						break;
+					}
+				}
+				// check left
+				for(int i = 2;  i < 4;i++){
+					if(positionInsideArena((row+i), (col - result))){
+						if(grid[row+i][col -result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col -result].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if(grid[row+i][col - result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col - result].getGridStatus()[1] != OBSTACLE){
+							left-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col - result].getGridStatus()[0] !=VISITED){
+							left-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				
+				// check right
+				int k = 0 - LONGRANGE_SENSOR_MAXIMUM_DISTANCE;
+				for(int i = -2; i > (k);i--){
+					if(positionInsideArena((row+i), (col - result))){
+						if(grid[row+i][col -result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col -result].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+		
+						if(grid[row+i][col - result].getGridStatus()[0] !=VISITED){
+							right-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				if(flag){
+					flag = false;
+					break;
+				}
+				right++;
+				left++;
+				front++;
+			}
+			break;
+		}
+		Arena.appendMessage("Left:" + left + " ; Front: " + front + " ; Right: " + right);
+		int k = Math.min(front, left);
+		k = Math.min(k, right);
+		
+		while(speedUpWillCrash(k)){
+			k=k-1;
+			if(k == 1){
+				return 0;
+			}
+		}
+		
+		if(dir == "B"){
+			k = decreaseIfNoObsatcle(k);
+		}
+		else{
+			k = k-2;
+		}
+		
+
+		if(k < 0)
+			k = 0;
+		
+		return k;
+	}
+	
+	private int runHowManyGrid(int row, int col, String dir) {
+		// TODO Auto-generated method stub
+		int result = 0;
+		int front = 0,left = 0,right = 0;
+		int deg = robot.getRobotHead();
+		boolean flag = false;
+		switch(deg){
+		case NORTH:
+			for(result = 0; result < 6; result++){
+				// check front first
+				for(int i = -1; i <=1; i++){
+					if(positionInsideArena((row-result), (col + i))){
+						if(grid[row - result][col + i].getGridStatus()[0] == VISITED &&
+								 grid[row - result][col + i].getGridStatus()[1] == OBSTACLE){
+							front=-1;
+							flag = true;
+							break;
+						}
+						if(grid[row - result][col + i].getGridStatus()[0] != VISITED){
+							front=-1;
+							flag = true;
+							break;
+						}
+					}
+					else{
+						front=-1;
+						flag = true;
+						break;
+					}
+				}
+				// check left	
+				for(int i = -2;  i >-4;i--){
+					if(positionInsideArena((row-1-result), (col + i))){
+						if(grid[row - result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row - result][col + i].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if (grid[row - 1 - result][col + i].getGridStatus()[0] == VISITED 
+								&& grid[row - result][col + i].getGridStatus()[1] != OBSTACLE){
+							left-=1;
+							flag = true;
+							break;
+						}
+						if (grid[row - result][col + i].getGridStatus()[0] != VISITED){
+							left-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				// check right
+				int k = LONGRANGE_SENSOR_MAXIMUM_DISTANCE;
+				for(int i = 2; i < (2+k);i++){
+
+					if(positionInsideArena((row-1-result), (col + i))){
+						if(grid[row - result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row - result][col + i].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						
+						if (grid[row - result][col + i].getGridStatus()[0] == VISITED){
+							right-=1;
+							flag = true;
+							break;
+						}
+						if (grid[row - result][col + i].getGridStatus()[0] != VISITED){
+							right-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				if(flag){
+					flag = false;
+					break;
+				}
+				front++;
+				left++;
+				right++;
+			}
+			break;
+		
+		case SOUTH:
+			for(result = 0; result < 6; result++){
+				// check front first
+				for(int i = -1; i <=1; i++){
+					if(positionInsideArena((row+result), (col + i))){
+						if (grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row+result][col + i].getGridStatus()[1] == OBSTACLE){
+							front=-1;
+							flag = true;
+							break;
+						}
+						if (grid[row+result][col + i].getGridStatus()[0] != VISITED){
+							front=-1;
+							flag = true;
+							break;
+						}
+					}
+					else{
+						front=-1;
+						flag = true;
+						break;
+					}
+				}
+				// check left
+				for(int i = 2;  i < 4;i++){
+					if(positionInsideArena((row+result), (col + i))){
+						if(grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row+result][col + i].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if (grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row+result][col + i].getGridStatus()[1] != OBSTACLE){
+							left-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+result][col + i].getGridStatus()[0] != VISITED){
+							left-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				// check right
+				int k = 0 - LONGRANGE_SENSOR_MAXIMUM_DISTANCE;
+				for(int i = -2; i > (-2+k) ;i--){
+					if(positionInsideArena((row+result), (col + i))){
+						if(grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+								grid[row+result][col + i].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if (grid[row+result][col + i].getGridStatus()[0] != VISITED){
+							right-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+result][col + i].getGridStatus()[0] == VISITED &&
+							grid[row + result][col + i].getGridStatus()[1] != OBSTACLE){
+							
+							right-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				if(flag){
+					flag = false;
+					break;
+				}
+				front++;
+				left++;
+				right++;
+			}
+
+			break;
+		case EAST:
+			for(result = 0; result < 6; result++){
+				// check front
+				for(int i = -1; i <=1; i++){
+					if(positionInsideArena((row+i), (col+ result))){
+						if (grid[row+i][col + result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col + result].getGridStatus()[1] == OBSTACLE){
+							front=-1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col+ result].getGridStatus()[0] != VISITED){
+							front=-1;
+							flag = true;
+							break;
+						}
+					}
+					else{
+						front=-1;
+						flag = true;
+						break;
+					}
+				}
+				// check left
+				for(int i = -2;  i > -4;i--){
+					if(positionInsideArena((row+i), (col + result))){
+						if(grid[row+i][col + result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col + result].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if(grid[row+i][col + result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col + result].getGridStatus()[1] != OBSTACLE){
+							left-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col + result].getGridStatus()[0] !=VISITED){
+							left-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				
+				// check right
+				int k = LONGRANGE_SENSOR_MAXIMUM_DISTANCE;
+				for(int i = 2; i < (2+k);i++){
+					if(positionInsideArena((row+i), (col + result))){
+						if(grid[row+i][col + result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col + result].getGridStatus()[1] == OBSTACLE){
+							right-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col + result].getGridStatus()[0] !=VISITED){
+							right = right -1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				if(flag){
+					flag = false;
+					break;
+				}	
+				left++;
+				right++;
+				front++;
+			}
+			break;
+		
+		case WEST:
+			for(result = 0; result < 6; result++){
+				// check front
+				for(int i = -1; i <= 1; i++){
+					if(positionInsideArena((row+i), (col - result))){
+						if (grid[row+i][col - result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col - result].getGridStatus()[1] == OBSTACLE){
+							front= -1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col - result].getGridStatus()[0] != VISITED){
+							front=-1;
+							flag = true;
+							break;
+						}
+					}
+					else{
+						front=-1;
+						flag = true;
+						break;
+					}
+				}
+				// check left
+				for(int i = 2;  i < 4;i++){
+					if(positionInsideArena((row+i), (col - result))){
+						if(grid[row+i][col -result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col -result].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+						
+						if(grid[row+i][col - result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col - result].getGridStatus()[1] != OBSTACLE){
+							left-=1;
+							flag = true;
+							break;
+						}
+						if(grid[row+i][col - result].getGridStatus()[0] !=VISITED){
+							left-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				
+				// check right
+				int k = 0 - LONGRANGE_SENSOR_MAXIMUM_DISTANCE;
+				for(int i = -2; i > (-2+k);i--){
+					if(positionInsideArena((row+i), (col - result))){
+						if(grid[row+i][col -result].getGridStatus()[0] == VISITED &&
+								grid[row+i][col -result].getGridStatus()[1] == OBSTACLE){
+							break;
+						}
+		
+						if(grid[row+i][col - result].getGridStatus()[0] !=VISITED){
+							right-=1;
+							flag = true;
+							break;
+						}
+					}
+				}
+				if(flag){
+					flag = false;
+					break;
+				}
+				right++;
+				left++;
+				front++;
+			}
+			break;
+		}
+		Arena.appendMessage("Left:" + left + " ; Front: " + front + " ; Right: " + right);
+		int k = Math.min(front, left);
+		k = Math.min(k, right);
+		
+		while(speedUpWillCrash(k)){
+			k=k-1;
+			if(k == 1){
+				return 0;
+			}
+		}
+		
+		if(dir == "B"){
+			k = decreaseIfNoObsatcle(k);
+		}
+		else{
+			k = k-2;
+		}
+		
+
+		if(k < 0)
+			k = 0;
+		
+		return k;
+	}
+	
+	private int decreaseIfNoObsatcle(int k) {
+		// TODO Auto-generated method stub
+		int dir = robot.getRobotHead();
 		int row = robot.getCurrentPosition()[0];
 		int col = robot.getCurrentPosition()[1];
 		
-
-		return result;
+		switch(dir){
+		case NORTH:
+			if(positionInsideArena((row), (col - 2))){
+				if(grid[row][col-2].getGridStatus()[0] == VISITED &&
+						grid[row][col-2].getGridStatus()[1] != OBSTACLE){
+					return k-1;
+				}
+			}
+			if (positionInsideArena((row), (col + 2))){
+				if(grid[row][col+2].getGridStatus()[0] == VISITED &&
+						grid[row][col +2].getGridStatus()[1] != OBSTACLE){
+					return k-1;
+				}
+			}
+			break;
+		case SOUTH:
+			if(positionInsideArena((row), (col - 2))){
+				if(grid[row][col-2].getGridStatus()[0] == VISITED &&
+						grid[row][col-2].getGridStatus()[1] != OBSTACLE){
+					return k-1;
+				}
+			}
+			if (positionInsideArena((row), (col + 2))){
+				if(grid[row][col+2].getGridStatus()[0] == VISITED &&
+						grid[row][col +2].getGridStatus()[1] != OBSTACLE){
+					return k-1;
+				}
+			}
+			break;
+		case EAST:
+			if(positionInsideArena((row-2), (col))){
+				if(grid[row-2][col].getGridStatus()[0] == VISITED &&
+						grid[row-2][col].getGridStatus()[1] != OBSTACLE){
+					return k-1;
+				}
+			}
+			if(positionInsideArena((row+2), (col))){
+				if(grid[row+2][col].getGridStatus()[0] == VISITED &&
+						grid[row][col].getGridStatus()[1] != OBSTACLE){
+					return k-1;
+				}
+			}
+			break;
+		case WEST:
+			if(positionInsideArena((row-2), (col))){
+				if(grid[row-2][col].getGridStatus()[0] == VISITED &&
+						grid[row-2][col].getGridStatus()[1] != OBSTACLE){
+					return k-1;
+				}
+			}
+			if(positionInsideArena((row+2), (col))){
+				if(grid[row+2][col].getGridStatus()[0] == VISITED &&
+						grid[row][col].getGridStatus()[1] != OBSTACLE){
+					return k-1;
+				}
+			}
+			break;
+		}
+		return k + 2;
 	}
+
+	private boolean speedUpWillCrash(int k){
+		int dir = robot.getRobotHead();
+		int row = robot.getCurrentPosition()[0];
+		int col = robot.getCurrentPosition()[1];
+
+		switch(dir){
+		case NORTH:
+			row= row - k;
+			if (positionInsideArena(row, col)){
+				return false;
+			}
+			else return true;
+			
+		case SOUTH:
+			row = row + k;
+			if (positionInsideArena(row, col)){
+				return false;
+			}
+			else return true;
+		case EAST:
+			col = col + k;
+			if (positionInsideArena(row, col)){
+				return false;
+			}
+			else return true;
+		case WEST:
+			col = col -k;
+			if (positionInsideArena(row, col)){
+				return false;
+			}
+			else return true;
+		}
+		return true;
+	}
+
 	/*
 	 * STRING CONVERTER 
 	 */	
@@ -763,7 +1463,7 @@ public class RealAlgorithmManager implements RobotArenaProtocol{
 	}
 
 	private String generateMsgToTablet2(ArrayList<String> result) {		
-		String output = TABLET +"@" + result.get(0) + "@" + result.get(1);
+		String output =  "@" + result.get(0) + "@" + result.get(1);
 		return output;
 	}
 	

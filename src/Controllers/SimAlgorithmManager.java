@@ -501,7 +501,6 @@ public class SimAlgorithmManager implements RobotArenaProtocol{
 				robot.turnBack();
 				break;
 				default:
-		
 			}
 			counter++;
 			Arena.appendMessage("Current Pos: " + robot.getCurrentPosition()[0] + ";" + robot.getCurrentPosition()[1] + "\tCount: " + counter);

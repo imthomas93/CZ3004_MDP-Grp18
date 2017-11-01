@@ -248,7 +248,6 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		
 	public void setUpSimArena()
 	{
-		// TODO Auto-generated method stub
 		for(int i = 0; i < ROW; i++){
 			for(int j = 0; j <COLUMN; j++){
 				// simulated arena is always visited
@@ -604,6 +603,8 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		rpiMgr.sendInstruction3(AUDUINO + TURNRIGHT);
 		rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
 		rpiMgr.sendInstruction2(AUDUINO + TURNRIGHT);
+		rpiMgr.sendInstruction3(AUDUINO + CALIBRATE);
+		
 		// turn to north
 		robot.turnBack();
 		arena.updateRobotPosition();
@@ -645,8 +646,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
  	class SwitchSimRealHandler implements ActionListener{
  		
  		public void actionPerformed(ActionEvent event){
- 			//TODO, SWITCH LOGIC
- 			//TODO, switch to block design arena
+ 			
  			if(!isRealRunNow){				
  				isRealRunNow  = true;
  				btnSimExp.setEnabled(false);

@@ -1147,7 +1147,7 @@ public class Robot implements RobotArenaProtocol{
 						else{
 							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else{
 						if(grid[curPosition[0]-2-i][curPosition[1]-1].getGridStatus()[1]== OBSTACLE){
@@ -1168,7 +1168,7 @@ public class Robot implements RobotArenaProtocol{
 						else{
 							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else{
 						if(grid[curPosition[0]+2+i][curPosition[1]+1].getGridStatus()[1]== OBSTACLE){
@@ -1189,7 +1189,7 @@ public class Robot implements RobotArenaProtocol{
 						else{
 							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1214,7 +1214,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 
 					}
 					else
@@ -1346,7 +1346,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-2-i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1371,7 +1371,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+2+i][curPosition[1]].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1396,7 +1396,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1421,7 +1421,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1468,7 +1468,7 @@ public class Robot implements RobotArenaProtocol{
 				if(positionInsideArena(curPosition[0]+2+i,curPosition[1]-1)){
 					//if((grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == VISITED && grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[1] == OBSTACLE)
 						//|| grid[curPosition[0]+2+i][curPosition[1]-1].getGridStatus()[0] == NOT_VISITED ){
-						
+					
 						if(i == obstacleDistance){
 							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, OBSTACLE);
 							obstacleDetected = true;
@@ -1546,7 +1546,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1571,7 +1571,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1596,7 +1596,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1620,7 +1620,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1655,7 +1655,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1680,7 +1680,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1705,7 +1705,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-2-i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1730,7 +1730,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+2+i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1765,7 +1765,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-1][curPosition[1]+2+i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1790,7 +1790,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+1][curPosition[1]-2-i].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1815,7 +1815,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]+2+i][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1840,7 +1840,7 @@ public class Robot implements RobotArenaProtocol{
 						{
 							grid[curPosition[0]-2-i][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 						}
-						RealAlgorithmManager.visitedCounter++;
+						
 					}
 					else
 					{
@@ -1905,7 +1905,7 @@ public class Robot implements RobotArenaProtocol{
 							{
 								grid[curPosition[0]-1][curPosition[1]+2+i1].setGridStatus(VISITED, NO_OBSTACLE);
 							}
-							RealAlgorithmManager.visitedCounter++;
+							
 						}
 						else
 						{
@@ -1930,7 +1930,7 @@ public class Robot implements RobotArenaProtocol{
 							{
 								grid[curPosition[0]+1][curPosition[1]-2-i1].setGridStatus(VISITED, NO_OBSTACLE);
 							}
-							RealAlgorithmManager.visitedCounter++;
+							
 						}
 						else
 						{
@@ -1955,7 +1955,7 @@ public class Robot implements RobotArenaProtocol{
 							{
 								grid[curPosition[0]+2+i1][curPosition[1]+1].setGridStatus(VISITED, NO_OBSTACLE);
 							}
-							RealAlgorithmManager.visitedCounter++;
+							
 						}
 						else
 						{
@@ -1980,7 +1980,7 @@ public class Robot implements RobotArenaProtocol{
 							{
 								grid[curPosition[0]-2-i1][curPosition[1]-1].setGridStatus(VISITED, NO_OBSTACLE);
 							}
-							RealAlgorithmManager.visitedCounter++;
+							
 						}
 						else
 						{

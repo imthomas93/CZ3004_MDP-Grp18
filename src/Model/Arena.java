@@ -33,6 +33,7 @@ import Controllers.RealAlgorithmManager;
 import Controllers.RpiManager;
 import Controllers.SimAlgorithmManager;
 import Controllers.SocketClientManager;
+import Controllers.StopWatch;
 import Services.Utilities;
 
 public class Arena extends JFrame implements RobotArenaProtocol{
@@ -44,6 +45,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	private RealAlgorithmManager realAlgoMgr;
 	private RpiManager rpiMgr;
 	private int[] wayPoint = new int[2];
+	public StopWatch stopWatch;
 
 	public static boolean isExplorationDone = false;
 	private boolean isRealRunNow = false;
@@ -84,7 +86,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		// prepare robot and arena
 		this.robot = robot;
 		arena = this;
-
+		stopWatch = new StopWatch();
 		// prepare algo
 		appendMessage("Mode: Simulation Mode");
 		simAlgoMgr = new SimAlgorithmManager(robot, arena, wayPoint);
@@ -535,9 +537,11 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 	
 	public void updateCoverageAndTime(){
 		double result = calculateExploredPercentage();
-		double time = 0;
+		result = Math.round(result *100) / 100;
+		
+		String time = stopWatch.toString();
 		jlbCoveragePercent.setText("Explored Coverage: "+result+"%");
-		jlbTimeCoverage.setText("Current Exoloration Time:" + time);
+		jlbTimeCoverage.setText("Current Exoloration Time: " + time);
 	}
 
 	public double calculateExploredPercentage(){
@@ -609,10 +613,12 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		robot.turnBack();
 		arena.updateRobotPosition();
 		appendMessage("Robot is ready for execution, awaiting command to explore!");
-				
-		String input = rpiMgr.getInstructionFromAndroid();
-		if(input.equals("EX")){
-			realAlgoMgr.realGo();	
+		
+		while(true){
+			String input = rpiMgr.getInstructionFromAndroid();
+			if(input.equals("EX")){
+				realAlgoMgr.realGo();	
+			}
 		}
 	}
 	
@@ -709,7 +715,6 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 		public void actionPerformed(ActionEvent event)
 		{
 			String msg1 = "Pls run FP Algo after exploring!\n";
-			String msg2 = "Starting fastest path now...\n";
 			if(isExplorationDone == false){
 				appendMessage(msg1);
 			}
@@ -736,7 +741,7 @@ public class Arena extends JFrame implements RobotArenaProtocol{
 				setStartGoalZone();
 			
 			jlbCoveragePercent.setText("Explored Coverage: 0%");
-
+			jlbTimeCoverage.setText("Current Exoloration Time:");
 			isExplorationDone = false;
 			appendMessage("Successfully reset arena!");
 		}

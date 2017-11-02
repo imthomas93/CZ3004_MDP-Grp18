@@ -658,7 +658,7 @@ public class Robot implements RobotArenaProtocol{
 
 	private void getLeftSensorData(Grid[][] grid) {
 		boolean obstacleDetected = false;
-		for (int i = 0; i < LONGRANGE_SENSOR_MAXIMUM_DISTANCE; i++) {
+		for (int i = 0; i < SHROTRANGE_SENSOR_DISTANCE; i++) {
 			switch (this.robotHead) {
 			case NORTH:
 				if(positionInsideArena(curPosition[0]-1,curPosition[1]-2-i)){

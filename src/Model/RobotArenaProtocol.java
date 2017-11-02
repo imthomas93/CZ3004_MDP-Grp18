@@ -18,7 +18,9 @@ public interface RobotArenaProtocol{
 	static final int[] GOALPOSITION = new int[]{1,13};
 	
 	// FILE IO
-	static final String FILENAME = "Load_Arena.txt";
+	//static final String FILENAME = "Load_Arena5.txt";
+	static final String FILENAME = "testBoost.txt";
+	//static final String FILENAME = "bugArena.txt";
 	static final String FILENAME2 = "Explored_Result.txt";
 	
 	 // ARENA DATA

@@ -20,7 +20,8 @@ Other components that is not included in this repository are the source code for
 
 ## Components
 
-
+Inline-style: 
+![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/components.png "Components")
 
 1. Editable 15 x 20 grid arena   
 2. Non Editable 15 x 20 grid arena   

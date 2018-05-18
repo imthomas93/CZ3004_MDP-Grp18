@@ -20,7 +20,6 @@ Other components that is not included in this repository are the source code for
 
 ## Components
 
-Inline-style: 
 ![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/components.png "Components")
 
 1. Editable 15 x 20 grid arena   
@@ -67,7 +66,6 @@ During an actual run, the sensor readings forwarded by the robot might not be al
 
 The simulator was build using Java Swing which replicate the exact environment of the maze including additional feature to change the condition of the maze run. This allow the scaling of the difficulties on the maze to simulate every possible scenario to gather information for validation.
 
-Inline-style: 
 ![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig1.png "Figure 1 – Overview of Arena")
 Figure 1 – Overview of Arena
 
@@ -78,7 +76,6 @@ Finally each grid will be coloured in 3 different type of colour which is to rep
 
 ## Exploration
 
-Inline-style: 
 ![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig2.gif "Figure 2  – Exploration Arena")
 Figure 2  – Exploration Arena 
 
@@ -86,7 +83,6 @@ The purpose of performing exploration is to map out as much details as possible 
 
 ## Wall Hugging (Left)
 
-Inline-style: 
 ![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig3.png "Figure 3 – Wall Hugging & Unforeseen circumstances")
 Figure 3 – Wall Hugging & Unforeseen circumstances
 
@@ -100,7 +96,7 @@ There are 3 different pair of combination of status that could be assign to a ce
 For example, moving to a grid will allocate a value of 1 step cost to the grid and if on the same grid cell a turning occur an additional value of 1 step cost will be added to the previous value allocated.
 
 ## Clean Up Exploration
-Inline-style: 
+
 ![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig5.gif "Figure 4 – Cleaning Up Exploration (2 rounds)")
 Figure 4 – Cleaning Up Exploration (2 rounds)
 
@@ -140,7 +136,6 @@ These additional features implemented will assist in providing the assurance of 
 
 ## Shortest Path
 
-Inline-style: 
 ![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig6.gif "Figure 5 Shortest Path Algorithm – Dijkstra Algorithm")
 Figure 5 Shortest Path Algorithm – Dijkstra Algorithm
 After exploration is done, computation of the shortest path based on the information obtained is required. In order to do this the heuristic function used by the informed search strategy must be carefully devised to avoid falling into an endless loop or a selection of an undesirable path.
@@ -148,11 +143,9 @@ After exploration is done, computation of the shortest path based on the informa
 ## Heuristic Function
 
 
-Inline-style: 
 ![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig7.jpg "Figure 6 – Step Cost ")
 Figure 6 – Step Cost                                                        
 
-Inline-style: 
 ![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig8.jpg "Figure 7 – Heuristic Computation")
 Figure 7 – Heuristic Computation
 

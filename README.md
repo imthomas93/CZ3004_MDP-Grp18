@@ -151,3 +151,13 @@ Figure 6 – Step Cost
 Figure 7 – Heuristic Computation
 
 The heuristic function used by Dijkstra algorithm to identify the shortest path will be based on the addition of the step cost of each accessible grid. The algorithm will then simulate all the possible paths from start to waypoint and from waypoint to goal. An example of how the heuristic function work is shown in Fig 7 and 8. During the simulation of possible paths, if there is a path resulting in moving straight grid to a turning grid it will automatically increase the step cost of the 3×3 grid it is on by 1. This way the algorithm sets moving straight as priority, to reduce time consuming turn commands.
+
+## Contributors
+1. Thomas Lim Jun Wei 
+2. Ng Zi Peng
+3. Lenze Quek Nian Loong  
+4. Lee Jia Qi 
+5. Vinupriya Subramaniyam 
+6. Quay Jun Hao Jerel 
+7. Jonathan Ng Sheng Guo 
+8. Lau Yi Hong

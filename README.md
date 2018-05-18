@@ -117,6 +117,7 @@ In addition to the basic functionalities of processing the sensor data, an exten
 ## Our Initiatives
 
 1. Robot Circling Preemption
+
 As the exploration algorithm requires the robot to stick to wall (preferably left). This allowed the robot to walk around the entire maze. However, there might be incidents where sensors readings isn’t accurate. which result in sudden “ghost” obstacle to be viewed immediately in front of the robot front grids. it is possible for the robot to get into a situation where the right side of the robot do not have obstacles or wall at all. In such cases, the robot might keep turning right, which results in robot circling, a common issue identified.
 
 To solve this problem in the algorithm level, every step the robot will perform checking to make decision for next step. Should the above situation is detected, a preemption will force the robot to first turn right and then keep moving forward until it reached an obstacle(or wall). Then it will turn left and then continue with exploration.

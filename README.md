@@ -67,6 +67,8 @@ During an actual run, the sensor readings forwarded by the robot might not be al
 
 The simulator was build using Java Swing which replicate the exact environment of the maze including additional feature to change the condition of the maze run. This allow the scaling of the difficulties on the maze to simulate every possible scenario to gather information for validation.
 
+Inline-style: 
+![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig1.png "Figure 1 – Overview of Arena")
 Figure 1 – Overview of Arena
 
 On the left console of shown in Fig 1, is the editable 15 x 20 grid arena whereby it shows the start position in pink and the goal position in orange. Furthermore, the grid of the arena can be clicked to add in obstacles to simulate the maze for simulation and validation.
@@ -76,12 +78,16 @@ Finally each grid will be coloured in 3 different type of colour which is to rep
 
 ## Exploration
 
-Figure 2  – Exploration Arena (click onto the image to view the gif)
+Inline-style: 
+![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig2.gif "Figure 2  – Exploration Arena")
+Figure 2  – Exploration Arena 
 
 The purpose of performing exploration is to map out as much details as possible of the given scenario which will be used later for the computation of the shortest path. This is achieve through the integration of multiple implementations to assure completeness.
 
 ## Wall Hugging (Left)
 
+Inline-style: 
+![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig3.png "Figure 3 – Wall Hugging & Unforeseen circumstances")
 Figure 3 – Wall Hugging & Unforeseen circumstances
 
 Exploration’s algorithm was implemented through the use of  the “wall hugging” method in the initial phase. As depicted in Fig 3, one side of the robot will try to remain in a predefined threshold value from the wall or obstacle while traversing. Thus, it will “hug” the outer perimeter of the maze and seek to achieve a full exploration with the aid of the sensor readings. However, in the event whereby certain area of the maze, shown in Fig 3, cannot be map out during the initial phase, clean up exploration will be done, which will be discuss under its own chapter later on.
@@ -94,8 +100,9 @@ There are 3 different pair of combination of status that could be assign to a ce
 For example, moving to a grid will allocate a value of 1 step cost to the grid and if on the same grid cell a turning occur an additional value of 1 step cost will be added to the previous value allocated.
 
 ## Clean Up Exploration
-
-Figure 4 – Cleaning Up Exploration (2 rounds) (click onto the image to view the gif)
+Inline-style: 
+![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig5.gif "Figure 4 – Cleaning Up Exploration (2 rounds)")
+Figure 4 – Cleaning Up Exploration (2 rounds)
 
 To provide coverage for uncovered areas from “wall hugging” algorithm due to unforeseen situations, illustrated in Fig 3, is the use of Dijkstra algorithm to explore the rest of the unvisited grid cell to complete the full exploration.
 
@@ -133,15 +140,20 @@ These additional features implemented will assist in providing the assurance of 
 
 ## Shortest Path
 
-Figure 6 Shortest Path Algorithm – Dijkstra Algorithm
+Inline-style: 
+![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig6.gif "Figure 5 Shortest Path Algorithm – Dijkstra Algorithm")
+Figure 5 Shortest Path Algorithm – Dijkstra Algorithm
 After exploration is done, computation of the shortest path based on the information obtained is required. In order to do this the heuristic function used by the informed search strategy must be carefully devised to avoid falling into an endless loop or a selection of an undesirable path.
 
 ## Heuristic Function
 
 
+Inline-style: 
+![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig7.jpg "Figure 6 – Step Cost ")
+Figure 6 – Step Cost                                                        
 
-Figure 7 – Step Cost                                                        
-
-Figure 8 – Heuristic Computation
+Inline-style: 
+![alt text](https://github.com/imthomas93/CZ3004_MDP-Grp18/blob/new_master/Image/fig8.jpg "Figure 7 – Heuristic Computation")
+Figure 7 – Heuristic Computation
 
 The heuristic function used by Dijkstra algorithm to identify the shortest path will be based on the addition of the step cost of each accessible grid. The algorithm will then simulate all the possible paths from start to waypoint and from waypoint to goal. An example of how the heuristic function work is shown in Fig 7 and 8. During the simulation of possible paths, if there is a path resulting in moving straight grid to a turning grid it will automatically increase the step cost of the 3×3 grid it is on by 1. This way the algorithm sets moving straight as priority, to reduce time consuming turn commands.

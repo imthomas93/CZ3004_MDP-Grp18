@@ -20,6 +20,8 @@ Other components that is not included in this repository are the source code for
 
 ## Components
 
+
+
 1. Editable 15 x 20 grid arena   
 2. Non Editable 15 x 20 grid arena   
 3. Speed terminal
@@ -83,9 +85,6 @@ Figure 3 – Wall Hugging & Unforeseen circumstances
 
 Exploration’s algorithm was implemented through the use of  the “wall hugging” method in the initial phase. As depicted in Fig 3, one side of the robot will try to remain in a predefined threshold value from the wall or obstacle while traversing. Thus, it will “hug” the outer perimeter of the maze and seek to achieve a full exploration with the aid of the sensor readings. However, in the event whereby certain area of the maze, shown in Fig 3, cannot be map out during the initial phase, clean up exploration will be done, which will be discuss under its own chapter later on.
 
-
-
-## Algorithm for left hugging
 
 ## Grid’s Attribute
 
